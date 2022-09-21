@@ -4,11 +4,15 @@ library taglib;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 
 part 'mp3.dart';
 part 'flac.dart';
+
+const List<int> headTimes = [0x200000, 0x4000, 0x80, 1];
+const List<int> tagTimes = [0x1000000, 0x10000, 0x100, 1];
 
 class AudioFile {
   AudioFile(this.path) {
@@ -28,7 +32,7 @@ Future<void> readMp3FIle(AudioFile audioFile) async {
   var dataStream = file.openRead(0, 10);
   String head = '';
   await for (var char in const Utf8Decoder().bind(dataStream)) head += char;
-  if (!head.startsWith('ID3\x03')) {
+  if (!(head.startsWith('ID3\x03') | head.startsWith('ID3\x04'))) {
     audioFile.title = '';
     audioFile.artist = '';
     audioFile.album = '';
@@ -40,103 +44,177 @@ Future<void> readMp3FIle(AudioFile audioFile) async {
     if (totalSize != 0) {
       dataStream = file.openRead(10, totalSize);
       List<int> tagData = await dataStream.first;
-      for (int i = 0; i < tagData.length - 4; i++) {
-        if (matchTag(tagData.sublist(i, i + 4))) {
-          print(i);
+      for (int i = 0; i < tagData.length - 10; i++) {
+        if (tagMap
+            .containsKey(String.fromCharCodes(tagData.sublist(i, i + 4)))) {
           print(String.fromCharCodes(tagData.sublist(i, i + 4)));
           int tagSize = 0;
-          for (int j = 0; j < 4; j++)
+          for (int j = 0; j < 4; j++) {
             tagSize += tagData[i + 4 + j] * tagTimes[j];
+          }
           print(tagSize);
+          print(tagMap[String.fromCharCodes(tagData.sublist(i, i + 4))]!
+              .call(tagData.sublist(i + 10, i + 10 + tagSize)));
+          i += tagSize + 9;
         }
       }
     }
   }
 }
 
-bool matchTag(List<int> byteList) {
-  for (List<int> tag in tagList) {
-    if (listEquals(tag, byteList)) return true;
-  }
-  return false;
+String readLatin1(List<int> byteList) {
+  return String.fromCharCodes(byteList);
 }
 
-const List<int> headTimes = [0x200000, 0x4000, 0x80, 1];
-const List<int> tagTimes = [0x1000000, 0x10000, 0x100, 1];
+String readUtf16LeString(List<int> byteList) {
+  List<int> utf16LeString =
+      List.generate((byteList.length / 2).ceil(), (index) => 0);
+  for (int i = 0; i < byteList.length; i++) {
+    if (i % 2 == 0) {
+      utf16LeString[i ~/ 2] = byteList[i];
+    } else {
+      utf16LeString[i ~/ 2] |= byteList[i] << 8;
+    }
+  }
+  return String.fromCharCodes(utf16LeString);
+}
 
-List<List<int>> tagList = [
-  'AENC'.codeUnits, //Audio encryption
-  'APIC'.codeUnits, //Attached picture
-  'COMM'.codeUnits, //Comments
-  'COMR'.codeUnits, //Commercial frame
-  'ENCR'.codeUnits, //Encryption method registration
-  'EQUA'.codeUnits, //Equalization
-  'ETCO'.codeUnits, //Event timing codes
-  'GEOB'.codeUnits, //General encapsulated object
-  'GRID'.codeUnits, //Group identification registration
-  'IPLS'.codeUnits, //Involved people list
-  'LINK'.codeUnits, //Linked information
-  'MCDI'.codeUnits, //Music CD identifier
-  'MLLT'.codeUnits, //MPEG location lookup table
-  'OWNE'.codeUnits, //Ownership frame
-  'PRIV'.codeUnits, //Private frame
-  'PCNT'.codeUnits, //Play counter
-  'POPM'.codeUnits, //Popularimeter
-  'POSS'.codeUnits, //Position synchronisation frame
-  'RBUF'.codeUnits, //Recommended buffer size
-  'RVAD'.codeUnits, //Relative volume adjustment
-  'RVRB'.codeUnits, //Reverb
-  'SYLT'.codeUnits, //Synchronized lyric/text
-  'SYTC'.codeUnits, //Synchronized tempo codes
-  'TALB'.codeUnits, //Album/Movie/Show title
-  'TBPM'.codeUnits, //BPM (beats per minute)
-  'TCOM'.codeUnits, //Composer
-  'TCON'.codeUnits, //Content type
-  'TCOP'.codeUnits, //Copyright message
-  'TDAT'.codeUnits, //Date
-  'TDLY'.codeUnits, //Playlist delay
-  'TENC'.codeUnits, //Encoded by
-  'TEXT'.codeUnits, //Lyricist/Text writer
-  'TFLT'.codeUnits, //File type
-  'TIME'.codeUnits, //Time
-  'TIT1'.codeUnits, //Content group description
-  'TIT2'.codeUnits, //Title/songname/content description
-  'TIT3'.codeUnits, //Subtitle/Description refinement
-  'TKEY'.codeUnits, //Initial key
-  'TLAN'.codeUnits, //Language(s)
-  'TLEN'.codeUnits, //Length
-  'TMED'.codeUnits, //Media type
-  'TOAL'.codeUnits, //Original album/movie/show title
-  'TOFN'.codeUnits, //Original filename
-  'TOLY'.codeUnits, //Original lyricist(s)/text writer(s)
-  'TOPE'.codeUnits, //Original artist(s)/performer(s)
-  'TORY'.codeUnits, //Original release year
-  'TOWN'.codeUnits, //File owner/licensee
-  'TPE1'.codeUnits, //Lead performer(s)/Soloist(s)
-  'TPE2'.codeUnits, //Band/orchestra/accompaniment
-  'TPE3'.codeUnits, //Conductor/performer refinement
-  'TPE4'.codeUnits, //Interpreted, remixed, or otherwise modified by
-  'TPOS'.codeUnits, //Part of a set
-  'TPUB'.codeUnits, //Publisher
-  'TRCK'.codeUnits, //Track number/Position in set
-  'TRDA'.codeUnits, //Recording dates
-  'TRSN'.codeUnits, //Internet radio station name
-  'TRSO'.codeUnits, //Internet radio station owner
-  'TSIZ'.codeUnits, //Size
-  'TSRC'.codeUnits, //ISRC (international standard recording code)
-  'TSSE'.codeUnits, //Software/Hardware and settings used for encoding
-  'TYER'.codeUnits, //Year
-  'TXXX'.codeUnits, //User defined text information frame
-  'UFID'.codeUnits, //Unique file identifier
-  'USER'.codeUnits, //Terms of use
-  'USLT'.codeUnits, //Unsychronized lyric/text transcription
-  'WCOM'.codeUnits, //Commercial information
-  'WCOP'.codeUnits, //Copyright/Legal information
-  'WOAF'.codeUnits, //Official audio file webpage
-  'WOAR'.codeUnits, //Official artist/performer webpage
-  'WOAS'.codeUnits, //Official audio source webpage
-  'WORS'.codeUnits, //Official internet radio station homepage
-  'WPAY'.codeUnits, //Payment
-  'WPUB'.codeUnits, //Publishers official webpage
-  'WXXX'.codeUnits, //User defined URL link frame
-];
+String readUtf16BeString(List<int> byteList) {
+  List<int> utf16BeString =
+      List.generate((byteList.length / 2).ceil(), (index) => 0);
+  for (int i = 0; i < byteList.length; i++) {
+    if (i % 2 == 0) {
+      utf16BeString[i ~/ 2] = byteList[i] << 8;
+    } else {
+      utf16BeString[i ~/ 2] |= byteList[i];
+    }
+  }
+  return String.fromCharCodes(utf16BeString);
+}
+
+String defaultReading(List<int> byteList) {
+  if (byteList.length > 2) {
+    if (byteList.first == 0x00) return (readLatin1(byteList.sublist(1)));
+    if (byteList.first == 0x01) return (readUtf16LeString(byteList.sublist(1)));
+    if (byteList.first == 0x02) return (readUtf16BeString(byteList.sublist(1)));
+    return '';
+  } else
+    return '';
+}
+
+String usltReading(List<int> byteList) {
+  if (byteList.length > 2) {
+    if (byteList.first == 0x00) return (readLatin1(byteList.sublist(10)));
+    if (byteList.first == 0x01) return (readUtf16LeString(byteList.sublist(8)));
+    if (byteList.first == 0x02) return (readUtf16BeString(byteList.sublist(8)));
+    return '';
+  } else
+    return '';
+}
+
+String commReading(List<int> byteList) {
+  if (byteList.length > 2) {
+    if (byteList.first == 0x00) return (readLatin1(byteList.sublist(5)));
+    if (byteList.first == 0x01) return (readUtf16LeString(byteList.sublist(5)));
+    if (byteList.first == 0x02) return (readUtf16BeString(byteList.sublist(5)));
+    return '';
+  } else
+    return '';
+}
+
+String txxxReading(List<int> byteList) {
+  if (byteList.length > 2) {
+    if (byteList.first == 0x00) return (readLatin1(byteList.sublist(2)));
+    if (byteList.first == 0x01) return (readUtf16LeString(byteList.sublist(2)));
+    if (byteList.first == 0x02) return (readUtf16BeString(byteList.sublist(2)));
+    return '';
+  } else
+    return '';
+}
+
+String wxxxReading(List<int> byteList) {
+  if (byteList.length > 2) {
+    if (byteList.first == 0x00) return (readLatin1(byteList.sublist(2)));
+    if (byteList.first == 0x01) return (readUtf16LeString(byteList.sublist(2)));
+    if (byteList.first == 0x02) return (readUtf16BeString(byteList.sublist(2)));
+    return '';
+  } else
+    return '';
+}
+
+Map<String, String Function(List<int>)> tagMap = {
+  'AENC': defaultReading, //Audio encryption
+  // 'APIC', //Attached picture TOO LARGE
+  'COMM': commReading, //Comments
+  'COMR': defaultReading, //Commercial frame
+  'ENCR': defaultReading, //Encryption method registration
+  'EQUA': defaultReading, //Equalization
+  'ETCO': defaultReading, //Event timing codes
+  'GEOB': defaultReading, //General encapsulated object
+  'GRID': defaultReading, //Group identification registration
+  'IPLS': defaultReading, //Involved people list
+  'LINK': defaultReading, //Linked information
+  'MCDI': defaultReading, //Music CD identifier
+  'MLLT': defaultReading, //MPEG location lookup table
+  'OWNE': defaultReading, //Ownership frame
+  'PRIV': defaultReading, //Private frame
+  'PCNT': defaultReading, //Play counter
+  'POPM': defaultReading, //Popularimeter
+  'POSS': defaultReading, //Position synchronisation frame
+  'RBUF': defaultReading, //Recommended buffer size
+  'RVAD': defaultReading, //Relative volume adjustment
+  'RVRB': defaultReading, //Reverb
+  'SYLT': defaultReading, //Synchronized lyric/text
+  'SYTC': defaultReading, //Synchronized tempo codes
+  'TALB': defaultReading, //Album/Movie/Show title
+  'TBPM': defaultReading, //BPM (beats per minute)
+  'TCOM': defaultReading, //Composer
+  'TCON': defaultReading, //Content type
+  'TCOP': defaultReading, //Copyright message
+  'TDAT': defaultReading, //Date
+  'TDLY': defaultReading, //Playlist delay
+  'TENC': defaultReading, //Encoded by
+  'TEXT': defaultReading, //Lyricist/Text writer
+  'TFLT': defaultReading, //File type
+  'TIME': defaultReading, //Time
+  'TIT1': defaultReading, //Content group description
+  'TIT2': defaultReading, //Title/songname/content description
+  'TIT3': defaultReading, //Subtitle/Description refinement
+  'TKEY': defaultReading, //Initial key
+  'TLAN': defaultReading, //Language(s)
+  'TLEN': defaultReading, //Length
+  'TMED': defaultReading, //Media type
+  'TOAL': defaultReading, //Original album/movie/show title
+  'TOFN': defaultReading, //Original filename
+  'TOLY': defaultReading, //Original lyricist(s)/text writer(s)
+  'TOPE': defaultReading, //Original artist(s)/performer(s)
+  'TORY': defaultReading, //Original release year
+  'TOWN': defaultReading, //File owner/licensee
+  'TPE1': defaultReading, //Lead performer(s)/Soloist(s)
+  'TPE2': defaultReading, //Band/orchestra/accompaniment
+  'TPE3': defaultReading, //Conductor/performer refinement
+  'TPE4': defaultReading, //Interpreted, remixed, or otherwise modified by
+  'TPOS': defaultReading, //Part of a set
+  'TPUB': defaultReading, //Publisher
+  'TRCK': defaultReading, //Track number/Position in set
+  'TRDA': defaultReading, //Recording dates
+  'TRSN': defaultReading, //Internet radio station name
+  'TRSO': defaultReading, //Internet radio station owner
+  'TSIZ': defaultReading, //Size
+  'TSRC': defaultReading, //ISRC (international standard recording code)
+  'TSSE': defaultReading, //Software/Hardware and settings used for encoding
+  'TYER': defaultReading, //Year
+  'TXXX': txxxReading, //User defined text information frame
+  'UFID': defaultReading, //Unique file identifier
+  'USER': defaultReading, //Terms of use
+  'USLT': usltReading, //Unsychronized lyric/text transcription
+  'WCOM': defaultReading, //Commercial information
+  'WCOP': defaultReading, //Copyright/Legal information
+  'WOAF': defaultReading, //Official audio file webpage
+  'WOAR': defaultReading, //Official artist/performer webpage
+  'WOAS': defaultReading, //Official audio source webpage
+  'WORS': defaultReading, //Official internet radio station homepage
+  'WPAY': defaultReading, //Payment
+  'WPUB': defaultReading, //Publishers official webpage
+  'WXXX': wxxxReading, //User defined URL link frame
+};
