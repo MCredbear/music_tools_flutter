@@ -8,6 +8,7 @@ Future<void> readMp3FIle(AudioFileBase audioFileBase) async {
   Map<String, Function(List<int>)> tagReadingMap = {
     // 'AENC': defaultReading, //Audio encryption
     'APIC': (List<int> byteList) {
+      byteList = byteList.sublist(13);
       Uint8List uint8list = Uint8List(byteList.length);
       for (int i = 0; i < byteList.length; i++) {
         uint8list[i] = byteList[i];
@@ -149,7 +150,6 @@ Future<void> readMp3FIle(AudioFileBase audioFileBase) async {
           i += tagSize + 9;
         }
       }
-      print(audioFileBase.toString());
     }
   }
 }
