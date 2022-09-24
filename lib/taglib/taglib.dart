@@ -16,18 +16,22 @@ part 'flac.dart';
 class AudioFile = AudioFileBase with _$AudioFile;
 
 abstract class AudioFileBase with Store {
-  AudioFileBase(this.path) {
+  AudioFileBase(this.path);
+  Future<void> read() async {
     if (extension(path).lastIndexOf(RegExp('mp3', caseSensitive: false)) != -1)
-      readMp3FIle(this);
+      await readMp3FIle(this);
     if (extension(path).lastIndexOf(RegExp('flac', caseSensitive: false)) != -1)
       readFlacFIle(this);
   }
+
+  void save() {}
 
   String path;
   @observable
   String title = '',
       artist = '',
       album = '',
+      albumArtist = '',
       lyric = '',
       comment = '',
       track = '',
@@ -50,6 +54,11 @@ abstract class AudioFileBase with Store {
   @action
   void setAlbum(String album) {
     this.album = album;
+  }
+
+  @action
+  void setAlbumArtist(String albumArtist) {
+    this.albumArtist = albumArtist;
   }
 
   @action

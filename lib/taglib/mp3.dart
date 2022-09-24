@@ -70,7 +70,7 @@ Future<void> readMp3FIle(AudioFileBase audioFileBase) async {
       audioFileBase.setArtist(defaultReading(byteList));
     }, //Lead performer(s)/Soloist(s)
     'TPE2': (List<int> byteList) {
-      audioFileBase.setArtist(defaultReading(byteList));
+      audioFileBase.setAlbumArtist(defaultReading(byteList));
     }, //Band/orchestra/accompaniment
     // 'TPE3': defaultReading, //Conductor/performer refinement
     // 'TPE4': defaultReading, //Interpreted, remixed, or otherwise modified by

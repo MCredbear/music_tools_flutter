@@ -196,6 +196,17 @@ mixin _$AudioFile on AudioFileBase, Store {
   }
 
   @override
+  void setAlbumArtist(String albumArtist) {
+    final _$actionInfo = _$AudioFileBaseActionController.startAction(
+        name: 'AudioFileBase.setAlbumArtist');
+    try {
+      return super.setAlbumArtist(albumArtist);
+    } finally {
+      _$AudioFileBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setLyric(String lyric) {
     final _$actionInfo = _$AudioFileBaseActionController.startAction(
         name: 'AudioFileBase.setLyric');
