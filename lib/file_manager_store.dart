@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:mobx/mobx.dart';
-import 'package:path_provider/path_provider.dart';
 
 part 'file_manager_store.g.dart';
 

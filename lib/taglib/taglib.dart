@@ -110,6 +110,8 @@ class AudioFile {
     switch (_format) {
       case Format.mp3:
         return _mp3file.getCover();
+      case Format.flac:
+        return _flacFile.getCover();
       default:
         return Uint8List(0);
     }

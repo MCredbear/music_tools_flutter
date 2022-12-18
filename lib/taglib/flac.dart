@@ -137,8 +137,25 @@ class VorbisComment {
 }
 
 class Picture {
-  Picture(this._flacMetaBlock);
+  Picture(this._flacMetaBlock) {
+    int mimeTypeLength = _flacMetaBlock.data[4] << 24 |
+        _flacMetaBlock.data[5] << 16 |
+        _flacMetaBlock.data[6] << 8 |
+        _flacMetaBlock.data[7];
+    int descStringLength = _flacMetaBlock.data[8 + mimeTypeLength] << 24 |
+        _flacMetaBlock.data[9 + mimeTypeLength] << 16 |
+        _flacMetaBlock.data[10 + mimeTypeLength] << 8 |
+        _flacMetaBlock.data[11 + mimeTypeLength];
+    _cover = Uint8List.fromList(_flacMetaBlock.data
+        .sublist(12 + mimeTypeLength + descStringLength + 20));
+  }
+
   final FlacMetaBlock _flacMetaBlock;
+  Uint8List _cover = Uint8List(0);
+
+  Uint8List getCover() {
+    return _cover;
+  }
 }
 
 class FlacFile {
@@ -171,6 +188,7 @@ class FlacFile {
       var metadataBytes = randomAccessFile.readSync(dataLength);
       flacMetaBlocks.add(FlacMetaBlock(type, metadataBytes));
       if (type == 4) _vorbisComment = VorbisComment(flacMetaBlocks.last);
+      if (type == 6) _picture = Picture(flacMetaBlocks.last);
     }
 
     return true;
@@ -199,6 +217,11 @@ class FlacFile {
   String getComment() {
     if (_vorbisComment != null) return _vorbisComment!.getComment();
     return '';
+  }
+
+  Uint8List getCover() {
+    if (_picture != null) return _picture!.getCover();
+    return Uint8List(0);
   }
 
   String getLyric() {

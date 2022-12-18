@@ -2,20 +2,20 @@ import 'dart:io';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
-// import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'editor_page.dart';
 
 import 'file_manager_store.dart';
 
 Future<void> main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // if (Platform.isAndroid) {
-  //   while (true) {
-  //     var result = await Permission.storage.request();
-  //     if (result.isGranted) break;
-  //   }
-  // }
+  WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isAndroid) {
+    while (true) {
+      var result = await Permission.storage.request();
+      if (result.isGranted) break;
+    }
+  }
   runApp(const MyApp());
 }
 
@@ -43,11 +43,13 @@ class FileManagerPage extends StatefulWidget {
 class FileManagerPageState extends State<FileManagerPage> {
   FileManagerStore fileManagerStore = FileManagerStore();
 
-  late String _path = Platform.isAndroid ? '/sdcard' : '/home/redbear/Music';
+  List<String> pathsQueue = [
+    Platform.isAndroid ? '/storage/emulated/0/' : '/home/redbear/Music'
+  ];
 
   @override
   void initState() {
-    fileManagerStore.readDir(_path);
+    fileManagerStore.readDir(pathsQueue.last);
     super.initState();
   }
 
@@ -60,14 +62,21 @@ class FileManagerPageState extends State<FileManagerPage> {
           IconButton(
               splashRadius: 24,
               onPressed: (() {
-                fileManagerStore.readDir(_path);
+                if (pathsQueue.length > 1) pathsQueue.removeLast();
+                fileManagerStore.readDir(pathsQueue.last);
+              }),
+              icon: const Icon(Icons.keyboard_arrow_left_sharp)),
+          IconButton(
+              splashRadius: 24,
+              onPressed: (() {
+                fileManagerStore.readDir(pathsQueue.last);
               }),
               icon: const Icon(Icons.refresh)),
           IconButton(
               splashRadius: 24,
               onPressed: (() {
-                _path = dirname(_path);
-                fileManagerStore.readDir(_path);
+                pathsQueue.add(dirname(pathsQueue.last));
+                fileManagerStore.readDir(pathsQueue.last);
               }),
               icon: const Icon(Icons.arrow_upward))
         ],
@@ -82,9 +91,10 @@ class FileManagerPageState extends State<FileManagerPage> {
                         onTap: (() {
                           if (fileManagerStore.elements.elementAt(index)
                               is Directory) {
-                            _path =
-                                fileManagerStore.elements.elementAt(index).path;
-                            fileManagerStore.readDir(_path);
+                            pathsQueue.add(fileManagerStore.elements
+                                .elementAt(index)
+                                .path);
+                            fileManagerStore.readDir(pathsQueue.last);
                           } else {
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
