@@ -1,15 +1,14 @@
-import 'dart:io';
-import 'dart:async';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:path/path.dart';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 import 'taglib/taglib.dart';
 
 class EditorPage extends StatefulWidget {
-  EditorPage(this.path, {super.key});
-  String path;
+  const EditorPage(this.path, {super.key});
+  final String path;
   @override
   State<EditorPage> createState() => EditorPageState();
 }
@@ -20,14 +19,18 @@ class EditorPageState extends State<EditorPage> {
   void initState() {
     audioFile = AudioFile(widget.path);
     audioFile.read().then((value) {
-      titleController.text = audioFile.title;
-      artistController.text = audioFile.artist;
-      albumController.text = audioFile.album;
-      albumArtistController.text = audioFile.albumArtist;
-      cdController.text = audioFile.cd;
-      trackController.text = audioFile.track;
-      lyricController.text = audioFile.lyric;
-      commentController.text = audioFile.comment;
+      titleController.text = audioFile.getTitle();
+      artistController.text = audioFile.getArtist();
+      albumController.text = audioFile.getAlbum();
+      albumArtistController.text = audioFile.getAlbumArtist();
+      cdController.text = audioFile.getCD();
+      trackController.text = audioFile.getTrack();
+      lyricController.text = audioFile.getLyric();
+      commentController.text = audioFile.getComment();
+
+      setState(() {
+        cover = audioFile.getCover();
+      });
     });
     super.initState();
   }
@@ -41,11 +44,17 @@ class EditorPageState extends State<EditorPage> {
   TextEditingController lyricController = TextEditingController();
   TextEditingController commentController = TextEditingController();
 
+  Uint8List cover = Uint8List(0);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Observer(builder: ((_) => Text(audioFile.title))),
+        title: Text(
+          basename(widget.path),
+          maxLines: 2,
+          textScaleFactor: 0.8,
+        ),
         actions: [
           IconButton(
               splashRadius: 24,
@@ -73,12 +82,9 @@ class EditorPageState extends State<EditorPage> {
                             clipBehavior: Clip.antiAlias,
                             margin: const EdgeInsets.all(0),
                             elevation: 8,
-                            child: Observer(
-                              builder: (_) => Image(
-                                image: MemoryImage(audioFile.cover.isNotEmpty
-                                    ? audioFile.cover
-                                    : kTransparentImage),
-                              ),
+                            child: Image(
+                              image: MemoryImage(
+                                  cover.isNotEmpty ? cover : kTransparentImage),
                             ),
                           ),
                         ),
@@ -97,7 +103,10 @@ class EditorPageState extends State<EditorPage> {
                                     child: MaterialButton(
                                       onPressed: () {},
                                       color: Colors.blue,
-                                      child: const Text('选择封面'),
+                                      child: const Text(
+                                        '选择封面',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                                     ),
                                   ),
                                   SizedBox(
@@ -105,14 +114,20 @@ class EditorPageState extends State<EditorPage> {
                                     child: MaterialButton(
                                         onPressed: () {},
                                         color: Colors.blue,
-                                        child: const Text('移除封面')),
+                                        child: const Text(
+                                          '移除封面',
+                                          style: TextStyle(color: Colors.white),
+                                        )),
                                   ),
                                   SizedBox(
                                     height: 40,
                                     child: MaterialButton(
                                         onPressed: () {},
                                         color: Colors.blue,
-                                        child: const Text('导出封面')),
+                                        child: const Text(
+                                          '导出封面',
+                                          style: TextStyle(color: Colors.white),
+                                        )),
                                   ),
                                 ],
                               ),
@@ -130,34 +145,34 @@ class EditorPageState extends State<EditorPage> {
                     controller: titleController,
                     style: const TextStyle(fontSize: 18),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 30),
                   const Text(
                     '歌手',
                     textScaleFactor: 1.4,
                   ),
-                  const SizedBox(height: 10),
                   TextField(
                     controller: artistController,
                     style: const TextStyle(fontSize: 18),
                   ),
+                  const SizedBox(height: 30),
                   const Text(
                     '专辑',
                     textScaleFactor: 1.4,
                   ),
-                  const SizedBox(height: 10),
                   TextField(
                     controller: albumController,
                     style: const TextStyle(fontSize: 18),
                   ),
+                  const SizedBox(height: 30),
                   const Text(
                     '专辑作者',
                     textScaleFactor: 1.4,
                   ),
-                  const SizedBox(height: 10),
                   TextField(
                     controller: albumArtistController,
                     style: const TextStyle(fontSize: 18),
                   ),
+                  const SizedBox(height: 30),
                   Row(
                     children: const [
                       Expanded(
@@ -197,7 +212,7 @@ class EditorPageState extends State<EditorPage> {
                     ],
                   ),
                   const SizedBox(
-                    width: 10,
+                    height: 30,
                   ),
                   const Text(
                     '歌词',
@@ -208,6 +223,7 @@ class EditorPageState extends State<EditorPage> {
                     maxLines: null,
                     style: const TextStyle(fontSize: 18),
                   ),
+                  const SizedBox(height: 30),
                   const Text(
                     '评论',
                     textScaleFactor: 1.4,

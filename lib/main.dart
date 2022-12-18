@@ -1,20 +1,26 @@
 import 'dart:io';
-import 'dart:async';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:permission_handler/permission_handler.dart';
 
 import 'editor_page.dart';
 
 import 'file_manager_store.dart';
 
-void main() {
-  runApp(MyApp());
+Future<void> main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // if (Platform.isAndroid) {
+  //   while (true) {
+  //     var result = await Permission.storage.request();
+  //     if (result.isGranted) break;
+  //   }
+  // }
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +29,13 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: FileManagerPage());
+        home: const FileManagerPage());
   }
 }
 
 class FileManagerPage extends StatefulWidget {
+  const FileManagerPage({super.key});
+
   @override
   State<FileManagerPage> createState() => FileManagerPageState();
 }
@@ -35,7 +43,7 @@ class FileManagerPage extends StatefulWidget {
 class FileManagerPageState extends State<FileManagerPage> {
   FileManagerStore fileManagerStore = FileManagerStore();
 
-  String _path = '/home/redbear/Music';
+  late String _path = Platform.isAndroid ? '/sdcard' : '/home/redbear/Music';
 
   @override
   void initState() {

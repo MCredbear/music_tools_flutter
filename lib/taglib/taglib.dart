@@ -4,95 +4,165 @@ library taglib;
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
-import 'package:mobx/mobx.dart';
-
-part 'taglib.g.dart';
 
 part 'mp3.dart';
 part 'flac.dart';
 
-class AudioFile = AudioFileBase with _$AudioFile;
+enum Format { unknow, mp3, flac }
 
-abstract class AudioFileBase with Store {
-  AudioFileBase(this.path);
-  Future<void> read() async {
-    if (extension(path).lastIndexOf(RegExp('mp3', caseSensitive: false)) != -1)
-      await readMp3FIle(this);
-    if (extension(path).lastIndexOf(RegExp('flac', caseSensitive: false)) != -1)
-      readFlacFIle(this);
+class AudioFile {
+  AudioFile(this._path) {
+    if (extension(_path).lastIndexOf(RegExp('mp3', caseSensitive: false)) !=
+        -1) {
+      _format = Format.mp3;
+      _mp3file = Mp3File(this);
+    } else if (extension(_path)
+            .lastIndexOf(RegExp('flac', caseSensitive: false)) !=
+        -1) {
+      _format = Format.flac;
+      _flacFile = FlacFile(this);
+    } else
+      _format = Format.unknow;
+  }
+
+  Future<bool> read() async {
+    switch (_format) {
+      case Format.mp3:
+        return await _mp3file.read(this);
+      case Format.flac:
+        return await _flacFile.read(this);
+      default:
+        return false;
+    }
   }
 
   void save() {}
 
-  String path;
-  @observable
-  String title = '',
-      artist = '',
-      album = '',
-      albumArtist = '',
-      lyric = '',
-      comment = '',
-      track = '',
-      cd = '',
-      year = '',
-      encoder = '';
-  @observable
+  String getTitle() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getTitle();
+      case Format.flac:
+        return _flacFile.getTitle();
+      default:
+        return "";
+    }
+  }
+
+  String getArtist() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getArtist();
+      case Format.flac:
+        return _flacFile.getArtist();
+      default:
+        return "";
+    }
+  }
+
+  String getAlbum() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getAlbum();
+      case Format.flac:
+        return _flacFile.getAlbum();
+      default:
+        return "";
+    }
+  }
+
+  String getAlbumArtist() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getAlbumArtist();
+      case Format.flac:
+        return _flacFile.getAlbumArtist();
+      default:
+        return "";
+    }
+  }
+
+  String getLyric() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getLyric();
+      case Format.flac:
+        return _flacFile.getLyric();
+      default:
+        return "";
+    }
+  }
+
+  String getComment() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getComment();
+      case Format.flac:
+        return _flacFile.getComment();
+      default:
+        return "";
+    }
+  }
+
+  Uint8List getCover() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getCover();
+      default:
+        return Uint8List(0);
+    }
+  }
+
+  String getTrack() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getTrack();
+      case Format.flac:
+        return _flacFile.getTrack();
+      default:
+        return "";
+    }
+  }
+
+  String getCD() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getCD();
+      case Format.flac:
+        return _flacFile.getCD();
+      default:
+        return "";
+    }
+  }
+
+  String getYear() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getYear();
+      default:
+        return "";
+    }
+  }
+
+  String getEncoder() {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.getEncoder();
+      case Format.flac:
+        return _flacFile.getEncoder();
+      default:
+        return "";
+    }
+  }
+
+  final String _path;
+
+  late Enum _format;
+
+  late Mp3File _mp3file;
+  late FlacFile _flacFile;
+
   Uint8List cover = Uint8List(0);
-
-  @action
-  void setTitle(String title) {
-    this.title = title;
-  }
-
-  @action
-  void setArtist(String artist) {
-    this.artist = artist;
-  }
-
-  @action
-  void setAlbum(String album) {
-    this.album = album;
-  }
-
-  @action
-  void setAlbumArtist(String albumArtist) {
-    this.albumArtist = albumArtist;
-  }
-
-  @action
-  void setLyric(String lyric) {
-    this.lyric = lyric;
-  }
-
-  @action
-  void setComment(String comment) {
-    this.comment = comment;
-  }
-
-  @action
-  void setTrack(String track) {
-    this.track = track;
-  }
-
-  @action
-  void setCD(String cd) {
-    this.cd = cd;
-  }
-
-  @action
-  void setYear(String year) {
-    this.year = year;
-  }
-
-  @action
-  void setEncoder(String encoder) {
-    this.encoder = encoder;
-  }
-
-  @action
-  void setCovre(Uint8List cover) {
-    this.cover = cover;
-  }
 }
