@@ -24,8 +24,60 @@ mixin _$FileManagerStore on FileManagerStoreBase, Store {
     });
   }
 
+  late final _$sortOrderAtom = Atom(name: 'FileManagerStoreBase.sortOrder');
+
+  @override
+  SortOrder get sortOrder {
+    _$sortOrderAtom.reportRead();
+    return super.sortOrder;
+  }
+
+  @override
+  set sortOrder(SortOrder value) {
+    _$sortOrderAtom.reportWrite(value, super.sortOrder, () {
+      super.sortOrder = value;
+    });
+  }
+
+  late final _$reservedAtom = Atom(name: 'FileManagerStoreBase.reserved');
+
+  @override
+  bool get reserved {
+    _$reservedAtom.reportRead();
+    return super.reserved;
+  }
+
+  @override
+  set reserved(bool value) {
+    _$reservedAtom.reportWrite(value, super.reserved, () {
+      super.reserved = value;
+    });
+  }
+
   late final _$FileManagerStoreBaseActionController =
       ActionController(name: 'FileManagerStoreBase');
+
+  @override
+  void setOrder(SortOrder order) {
+    final _$actionInfo = _$FileManagerStoreBaseActionController.startAction(
+        name: 'FileManagerStoreBase.setOrder');
+    try {
+      return super.setOrder(order);
+    } finally {
+      _$FileManagerStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void reserve() {
+    final _$actionInfo = _$FileManagerStoreBaseActionController.startAction(
+        name: 'FileManagerStoreBase.reserve');
+    try {
+      return super.reserve();
+    } finally {
+      _$FileManagerStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void readDir(String path) {
@@ -41,7 +93,9 @@ mixin _$FileManagerStore on FileManagerStoreBase, Store {
   @override
   String toString() {
     return '''
-elements: ${elements}
+elements: ${elements},
+sortOrder: ${sortOrder},
+reserved: ${reserved}
     ''';
   }
 }
