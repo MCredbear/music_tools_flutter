@@ -38,7 +38,14 @@ class AudioFile {
     }
   }
 
-  void save() {}
+  Future<bool> save() async {
+    switch (_format) {
+      case Format.mp3:
+        return await _mp3file.save(this);
+      default:
+        return false;
+    }
+  }
 
   String getTitle() {
     switch (_format) {
@@ -143,6 +150,8 @@ class AudioFile {
     switch (_format) {
       case Format.mp3:
         return _mp3file.getYear();
+      case Format.flac:
+        return _flacFile.getYear();
       default:
         return "";
     }
@@ -156,6 +165,105 @@ class AudioFile {
         return _flacFile.getEncoder();
       default:
         return "";
+    }
+  }
+
+  void setTitle(String title) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setTitle(title);
+      case Format.flac:
+        return _flacFile.setTitle(title);
+    }
+  }
+
+  void setArtist(String artist) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setArtist(artist);
+      case Format.flac:
+        return _flacFile.setArtist(artist);
+    }
+  }
+
+  void setAlbum(String album) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setAlbum(album);
+      case Format.flac:
+        return _flacFile.setAlbum(album);
+    }
+  }
+
+  void setAlbumArtist(String albumArtist) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setAlbumArtist(albumArtist);
+      case Format.flac:
+        return _flacFile.setAlbumArtist(albumArtist);
+    }
+  }
+
+  void setLyric(String lyric) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setLyric(lyric);
+      case Format.flac:
+        return _flacFile.setLyric(lyric);
+    }
+  }
+
+  void setComment(String comment) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setComment(comment);
+      case Format.flac:
+        return _flacFile.setComment(comment);
+    }
+  }
+
+  void setCover(Uint8List cover) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setCover(cover);
+      case Format.flac:
+        return _flacFile.setCover(cover);
+    }
+  }
+
+  void setTrack(String track) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setTrack(track);
+      case Format.flac:
+        return _flacFile.setTrack(track);
+    }
+  }
+
+  void setCD(String cd) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setCD(cd);
+      case Format.flac:
+        return _flacFile.setCD(cd);
+    }
+  }
+
+  void setYear(String year) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setYear(year);
+      case Format.flac:
+        return _flacFile.setYear(year);
+    }
+  }
+
+  void setEncoder(String encoder) {
+    switch (_format) {
+      case Format.mp3:
+        return _mp3file.setEncoder(encoder);
+      case Format.flac:
+        return _flacFile.setEncoder(encoder);
     }
   }
 

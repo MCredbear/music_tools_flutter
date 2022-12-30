@@ -134,6 +134,28 @@ class VorbisComment {
     }
     return '';
   }
+
+  void setTitle(String title) {}
+
+  void setArtist(String artist) {}
+
+  void setAlbum(String album) {}
+
+  void setAlbumArtist(String albumArtist) {}
+
+  void setLyric(String lyric) {}
+
+  void setComment(String comment) {}
+
+  void setCover(Uint8List cover) {}
+
+  void setTrack(String track) {}
+
+  void setCD(String cd) {}
+
+  void setYear(String year) {}
+
+  void setEncoder(String encoder) {}
 }
 
 class Picture {
@@ -239,8 +261,57 @@ class FlacFile {
     return '';
   }
 
+  String getYear() {
+    if (_vorbisComment != null) return _vorbisComment!.getYear();
+    return '';
+  }
+
   String getEncoder() {
     if (_vorbisComment != null) return _vorbisComment!.getCD();
     return '';
+  }
+
+  void setTitle(String title) {
+    if (_vorbisComment != null) _vorbisComment!.setTitle(title);
+  }
+
+  void setArtist(String artist) {
+    if (_vorbisComment != null) _vorbisComment!.setArtist(artist);
+  }
+
+  void setAlbum(String album) {
+    if (_vorbisComment != null) _vorbisComment!.setAlbum(album);
+  }
+
+  void setAlbumArtist(String albumArtist) {
+    if (_vorbisComment != null) _vorbisComment!.setAlbumArtist(albumArtist);
+  }
+
+  void setLyric(String lyric) {
+    if (_vorbisComment != null) _vorbisComment!.setLyric(lyric);
+  }
+
+  void setComment(String comment) {
+    if (_vorbisComment != null) _vorbisComment!.setComment(comment);
+  }
+
+  void setCover(Uint8List cover) {
+    if (_vorbisComment != null) _vorbisComment!.setCover(cover);
+  }
+
+  void setTrack(String track) {
+    if (_vorbisComment != null) _vorbisComment!.setTrack(track);
+  }
+
+  void setCD(String cd) {
+    if (_vorbisComment != null) _vorbisComment!.setCD(cd);
+  }
+
+  void setYear(String year) {
+    if (_vorbisComment != null) _vorbisComment!.setYear(year);
+  }
+
+  void setEncoder(String encoder) {
+    if (_vorbisComment != null) _vorbisComment!.setEncoder(encoder);
   }
 }

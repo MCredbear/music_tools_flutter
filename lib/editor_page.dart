@@ -25,9 +25,9 @@ class EditorPageState extends State<EditorPage> {
       albumArtistController.text = audioFile.getAlbumArtist();
       cdController.text = audioFile.getCD();
       trackController.text = audioFile.getTrack();
+      yearController.text = audioFile.getYear();
       lyricController.text = audioFile.getLyric();
       commentController.text = audioFile.getComment();
-
       setState(() {
         cover = audioFile.getCover();
       });
@@ -41,6 +41,7 @@ class EditorPageState extends State<EditorPage> {
   TextEditingController albumArtistController = TextEditingController();
   TextEditingController cdController = TextEditingController();
   TextEditingController trackController = TextEditingController();
+  TextEditingController yearController = TextEditingController();
   TextEditingController lyricController = TextEditingController();
   TextEditingController commentController = TextEditingController();
 
@@ -58,7 +59,17 @@ class EditorPageState extends State<EditorPage> {
         actions: [
           IconButton(
               splashRadius: 24,
-              onPressed: (() {}),
+              onPressed: (() {
+                audioFile.setTitle(titleController.text);
+                audioFile.setAlbum(albumController.text);
+                audioFile.setArtist(artistController.text);
+                audioFile.setAlbumArtist(albumArtistController.text);
+                audioFile.setCD(cdController.text);
+                audioFile.setTrack(trackController.text);
+                audioFile.setLyric(lyricController.text);
+                audioFile.setComment(commentController.text);
+                audioFile.save();
+              }),
               icon: const Icon(Icons.save)),
         ],
       ),
@@ -210,6 +221,15 @@ class EditorPageState extends State<EditorPage> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 30),
+                  const Text(
+                    '年份',
+                    textScaleFactor: 1.4,
+                  ),
+                  TextField(
+                    controller: yearController,
+                    style: const TextStyle(fontSize: 18),
                   ),
                   const SizedBox(
                     height: 30,
