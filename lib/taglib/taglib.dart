@@ -30,9 +30,9 @@ class AudioFile {
   Future<bool> read() async {
     switch (_format) {
       case Format.mp3:
-        return await _mp3file.read(this);
+        return await _mp3file.read();
       case Format.flac:
-        return await _flacFile.read(this);
+        return await _flacFile.read();
       default:
         return false;
     }
@@ -41,7 +41,9 @@ class AudioFile {
   Future<bool> save() async {
     switch (_format) {
       case Format.mp3:
-        return await _mp3file.save(this);
+        return await _mp3file.save();
+      case Format.flac:
+        return await _flacFile.save();
       default:
         return false;
     }
