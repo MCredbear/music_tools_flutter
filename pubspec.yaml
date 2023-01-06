@@ -17,8 +17,9 @@ dependencies:
   path_provider: ^2.0.11
   transparent_image: ^2.0.0
   permission_handler: ^10.2.0
+  fluttertoast: ^8.1.2
 
-  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

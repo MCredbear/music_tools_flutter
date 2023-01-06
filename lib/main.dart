@@ -144,12 +144,13 @@ class FileManagerPageState extends State<FileManagerPage> {
                                 .path);
                             fileManagerStore.readDir(pathsQueue.last);
                           } else {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return EditorPage(fileManagerStore.elements
-                                  .elementAt(index)
-                                  .path);
-                            }));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => EditorPage(
+                                        fileManagerStore.elements
+                                            .elementAt(index)
+                                            .path)));
                           }
                         }),
                         leading: (fileManagerStore.elements.elementAt(index)

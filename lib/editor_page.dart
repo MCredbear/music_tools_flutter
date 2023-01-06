@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:music_tools_flutter/search_page.dart';
 import 'package:path/path.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -74,190 +75,199 @@ class EditorPageState extends State<EditorPage> {
         ],
       ),
       body: Center(
-        child: ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20),
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        top: 16, bottom: 16, left: 8, right: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Card(
-                            clipBehavior: Clip.antiAlias,
-                            margin: const EdgeInsets.all(0),
-                            elevation: 8,
-                            child: Image(
-                              image: MemoryImage(
-                                  cover.isNotEmpty ? cover : kTransparentImage),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 16),
-                            child: SizedBox(
-                              height: 180,
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  SizedBox(
-                                    height: 40,
-                                    child: MaterialButton(
-                                      onPressed: () {},
-                                      color: Colors.blue,
-                                      child: const Text(
-                                        '选择封面',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 40,
-                                    child: MaterialButton(
-                                        onPressed: () {},
-                                        color: Colors.blue,
-                                        child: const Text(
-                                          '移除封面',
-                                          style: TextStyle(color: Colors.white),
-                                        )),
-                                  ),
-                                  SizedBox(
-                                    height: 40,
-                                    child: MaterialButton(
-                                        onPressed: () {},
-                                        color: Colors.blue,
-                                        child: const Text(
-                                          '导出封面',
-                                          style: TextStyle(color: Colors.white),
-                                        )),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
+                  Expanded(
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      margin: const EdgeInsets.all(0),
+                      elevation: 8,
+                      child: Image(
+                          image: MemoryImage(
+                              cover.isNotEmpty ? cover : kTransparentImage),
+                          fit: BoxFit.contain),
                     ),
                   ),
-                  const Text(
-                    '歌曲名',
-                    textScaleFactor: 1.4,
-                  ),
-                  TextField(
-                    controller: titleController,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    '歌手',
-                    textScaleFactor: 1.4,
-                  ),
-                  TextField(
-                    controller: artistController,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    '专辑',
-                    textScaleFactor: 1.4,
-                  ),
-                  TextField(
-                    controller: albumController,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    '专辑作者',
-                    textScaleFactor: 1.4,
-                  ),
-                  TextField(
-                    controller: albumArtistController,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    children: const [
-                      Expanded(
-                        child: Text(
-                          '磁盘号',
-                          textScaleFactor: 1.4,
+                  const SizedBox(width: 20),
+                  Container(
+                    constraints: const BoxConstraints(
+                        maxHeight: 250,
+                        minHeight: 200,
+                        maxWidth: 100,
+                        minWidth: 80),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          height: 40,
+                          child: MaterialButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => CoverSearchPage(
+                                          titleController.text)));
+                            },
+                            color: Colors.blue,
+                            child: const Text(
+                              '下载封面',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Text(
-                          '音轨',
-                          textScaleFactor: 1.4,
+                        SizedBox(
+                          height: 40,
+                          child: MaterialButton(
+                            onPressed: () {},
+                            color: Colors.blue,
+                            child: const Text(
+                              '选择封面',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: cdController,
-                          style: const TextStyle(fontSize: 18),
+                        SizedBox(
+                          height: 40,
+                          child: MaterialButton(
+                              onPressed: () {},
+                              color: Colors.blue,
+                              child: const Text(
+                                '移除封面',
+                                style: TextStyle(color: Colors.white),
+                              )),
                         ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: trackController,
-                          style: const TextStyle(fontSize: 18),
+                        SizedBox(
+                          height: 40,
+                          child: MaterialButton(
+                              onPressed: () {},
+                              color: Colors.blue,
+                              child: const Text(
+                                '导出封面',
+                                style: TextStyle(color: Colors.white),
+                              )),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    '年份',
-                    textScaleFactor: 1.4,
-                  ),
-                  TextField(
-                    controller: yearController,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  const Text(
-                    '歌词',
-                    textScaleFactor: 1.4,
-                  ),
-                  TextField(
-                    controller: lyricController,
-                    maxLines: null,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    '评论',
-                    textScaleFactor: 1.4,
-                  ),
-                  TextField(
-                    controller: commentController,
-                    maxLines: null,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
+                      ],
+                    ),
+                  )
                 ],
               ),
-            )
-          ],
+              const SizedBox(height: 30),
+              const Text(
+                '歌曲名',
+                textScaleFactor: 1.4,
+              ),
+              TextField(
+                controller: titleController,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                '歌手',
+                textScaleFactor: 1.4,
+              ),
+              TextField(
+                controller: artistController,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                '专辑',
+                textScaleFactor: 1.4,
+              ),
+              TextField(
+                controller: albumController,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                '专辑作者',
+                textScaleFactor: 1.4,
+              ),
+              TextField(
+                controller: albumArtistController,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 30),
+              Row(
+                children: const [
+                  Expanded(
+                    child: Text(
+                      '磁盘号',
+                      textScaleFactor: 1.4,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: Text(
+                      '音轨',
+                      textScaleFactor: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: cdController,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: trackController,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                '年份',
+                textScaleFactor: 1.4,
+              ),
+              TextField(
+                controller: yearController,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              const Text(
+                '歌词',
+                textScaleFactor: 1.4,
+              ),
+              TextField(
+                controller: lyricController,
+                maxLines: null,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                '评论',
+                textScaleFactor: 1.4,
+              ),
+              TextField(
+                controller: commentController,
+                maxLines: null,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 30)
+            ],
+          ),
         ),
       ),
     );
