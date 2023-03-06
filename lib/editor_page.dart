@@ -118,9 +118,11 @@ class EditorPageState extends State<EditorPage> {
                                   MaterialPageRoute(
                                       builder: (context) => CoverSearchPage(
                                           titleController.text)));
-                              setState(() {
-                                cover = data ;
-                              });
+                              if (data) {
+                                setState(() {
+                                  cover = data;
+                                });
+                              }
                             },
                             color: Colors.blue,
                             child: const Text(
