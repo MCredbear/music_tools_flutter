@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -43,13 +44,22 @@ class FileManagerPage extends StatefulWidget {
 class FileManagerPageState extends State<FileManagerPage> {
   FileManagerStore fileManagerStore = FileManagerStore();
 
-  List<String> pathsQueue = [
-    Platform.isAndroid ? '/storage/emulated/0/' : '/home/redbear/Music'
-  ];
+  List<String> pathsQueue = [];
 
   @override
   void initState() {
-    fileManagerStore.readDir(pathsQueue.last);
+    if(Platform.isAndroid) {
+      getExternalStorageDirectories().then((value) { // TODO: Add multi-storage option
+        pathsQueue.add(value!.first.parent.parent.parent.parent.path);
+        fileManagerStore.readDir(pathsQueue.last);
+      });
+    }
+    else {
+      getApplicationDocumentsDirectory().then((value) {
+        pathsQueue.add(value.parent.path);
+        fileManagerStore.readDir(pathsQueue.last);
+      });
+    }
     super.initState();
   }
 
