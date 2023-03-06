@@ -72,6 +72,7 @@ class EditorPageState extends State<EditorPage> {
                 audioFile.setTrack(trackController.text);
                 audioFile.setLyric(lyricController.text);
                 audioFile.setComment(commentController.text);
+                audioFile.setCover(cover);
                 audioFile.save();
               }),
               icon: const Icon(Icons.save)),
@@ -113,12 +114,12 @@ class EditorPageState extends State<EditorPage> {
                           height: 40,
                           child: MaterialButton(
                             onPressed: () async {
-                              var data = await Navigator.push(
+                              Uint8List data = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => CoverSearchPage(
                                           titleController.text)));
-                              if (data) {
+                              if (data.isNotEmpty) {
                                 setState(() {
                                   cover = data;
                                 });
