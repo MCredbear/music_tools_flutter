@@ -9,13 +9,16 @@ import 'taglib/taglib.dart';
 
 class EditorPage extends StatefulWidget {
   const EditorPage(this.path, {super.key});
+
   final String path;
+
   @override
   State<EditorPage> createState() => EditorPageState();
 }
 
 class EditorPageState extends State<EditorPage> {
   late AudioFile audioFile;
+
   @override
   void initState() {
     audioFile = AudioFile(widget.path);
@@ -109,12 +112,15 @@ class EditorPageState extends State<EditorPage> {
                         SizedBox(
                           height: 40,
                           child: MaterialButton(
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              var data = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => CoverSearchPage(
                                           titleController.text)));
+                              setState(() {
+                                cover = data ;
+                              });
                             },
                             color: Colors.blue,
                             child: const Text(
