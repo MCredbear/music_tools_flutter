@@ -15,7 +15,8 @@ jobs:
 
       - uses: subosito/flutter-action@v2.12.0
         with:
-          flutter-version: '3.17.0'
+          flutter-version: '3.17.0-1.0.pre.38'
+          channel: 'master'
           
       - name: Setup Java JDK
         uses: actions/setup-java@v4.0.0
