@@ -15,7 +15,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2.12.0
         with:
-          flutter-version: '3.3.0-97.0'
+          flutter-version: '3.3.0'
           channel: 'dev'
           
       - name: Setup Java JDK
