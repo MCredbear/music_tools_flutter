@@ -15,7 +15,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2.12.0
         with:
-          flutter-version: '3.3.0'
+          flutter-version: '3.17.0'
           
       - name: Setup Java JDK
         uses: actions/setup-java@v4.0.0
