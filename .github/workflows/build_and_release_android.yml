@@ -24,7 +24,7 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
 
-      - run: dart pub get
+      - run: flutter pub get
       - run: flutter build apk --release
 
       - name: Release
