@@ -14,94 +14,74 @@ class CoverSearchPage extends StatefulWidget {
 }
 
 class _CoverSearchPageState extends State<CoverSearchPage> {
-  late TextEditingController keywordController;
+  late TextEditingController _keywordController;
 
-  final ScrollController scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
-  List<Widget> covers = [];
+  final List<Widget> _coverCards = [];
 
-  bool isLoading = true;
-  int offset = 0;
-  late String _keyword;
+  bool _isLoading = true;
+  bool _noMoreSong = false;
+  int _offset = 0;
 
   @override
   void initState() {
-    keywordController = TextEditingController(text: widget.keyword);
-    firstSearch(keywordController.text).then((value) {
-      scrollController.addListener(() {
-        if (scrollController.position.pixels ==
-            scrollController.position.maxScrollExtent) {
-          nextSearch();
+    super.initState();
+    _keywordController = TextEditingController(text: widget.keyword);
+    search(_keywordController.text, _offset).then((value) {
+      _scrollController.addListener(() {
+        if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent) {
+          _offset += 1;
+          search(_keywordController.text, _offset);
         }
       });
     });
-
-    super.initState();
   }
 
-  Future<void> firstSearch(String keyword) async {
+  Future<void> search(String keyword, int offset) async {
     try {
-      _keyword = keyword;
-      offset = 0;
-      var httpClient = HttpClient();
-      var httpRequest = await httpClient.get('music.163.com', 80,
-          '/api/cloudsearch/pc?s=${Uri.encodeFull(_keyword.substring(1))}&type=1&limit=10&offset=$offset&total=true');
-      var response = await httpRequest.close();
+      final httpClient = HttpClient();
+      final httpRequest = await httpClient.get('music.163.com', 80,
+          '/api/cloudsearch/pc?s=${Uri.encodeFull(keyword.substring(1))}&type=1&limit=10&offset=$offset&total=true');
+      final response = await httpRequest.close();
       httpClient.close();
-      var dataStream = response.transform(utf8.decoder);
-      var data = '';
-      await for (var data_ in dataStream) {
-        data += data_;
+      final dataStream = response.transform(utf8.decoder);
+      var jsonData = '';
+      await for (final data in dataStream) {
+        jsonData += data;
       }
       httpClient.close();
-      var json = jsonDecode(data);
-      var songs = json['result']['songs'];
-      var covers_ = <Widget>[];
-      for (var song in songs) {
-        covers_.add(ImageCard(song['al']['picUrl'] ?? '', song['name'] ?? '',
-            song['ar'][0]['name'] ?? '', song['al']['name'] ?? ''));
+      final json = jsonDecode(jsonData);
+      final int songCount = json['result']['songCount'];
+      if (songCount == 0) {
+        setState(() {
+          if (offset == 0) _coverCards.clear();
+          _noMoreSong = true;
+        });
+        return;
+      } else {
+        setState(() {
+          _noMoreSong = false;
+        });
+      }
+      final songs = json['result']['songs'];
+      final newCovers = <Widget>[];
+      for (final song in songs) {
+        String? imageUrl = song['al']['picUrl'];
+        if (imageUrl != null) {
+          imageUrl = imageUrl.replaceFirst('http:', 'https:');
+          newCovers.add(ImageCard(imageUrl, song['name'] ?? '',
+              song['ar'][0]['name'] ?? '', song['al']['name'] ?? ''));
+        }
       }
       setState(() {
-        covers = covers_;
+        if (offset == 0) _coverCards.clear();
+        _coverCards.addAll(newCovers);
       });
-      offset++;
     } catch (e) {
       setState(() {
-        isLoading = false;
-      });
-      Fluttertoast.showToast(msg: '获取失败，请检查您的网络');
-    }
-  }
-
-  Future<void> nextSearch() async {
-    try {
-      var httpClient = HttpClient();
-      var httpRequest = await httpClient.get('music.163.com', 80,
-          '/api/cloudsearch/pc?s=${Uri.encodeFull(_keyword.substring(1))}&type=1&limit=10&offset=$offset&total=true');
-      var response = await httpRequest.close();
-      httpClient.close();
-      var dataStream = response.transform(utf8.decoder);
-      var data = '';
-      await for (var data_ in dataStream) {
-        data += data_;
-      }
-      httpClient.close();
-      var json = jsonDecode(data);
-      var songs = json['result']['songs'];
-      var covers_ = <Widget>[];
-      for (var song in songs) {
-        covers_.add(ImageCard(song['al']['picUrl'] ?? '', song['name'] ?? '',
-            song['ar'][0]['name'] ?? '', song['al']['name'] ?? ''));
-      }
-      setState(() {
-        covers += covers_;
-      });
-      offset++;
-    } catch (e) {
-      offset--;
-      setState(() {
-        isLoading = false;
-        covers = [];
+        _isLoading = false;
       });
       Fluttertoast.showToast(msg: '获取失败，请检查您的网络');
     }
@@ -112,10 +92,11 @@ class _CoverSearchPageState extends State<CoverSearchPage> {
     return Scaffold(
         appBar: AppBar(
           title: TextField(
-            onSubmitted: (value) {
-              firstSearch(value);
+            onSubmitted: (keyword) {
+              _offset = 0;
+              search(keyword, _offset);
             },
-            controller: keywordController,
+            controller: _keywordController,
             style: const TextStyle(color: Colors.white, fontSize: 18),
             cursorColor: Colors.white,
             decoration: const InputDecoration(
@@ -127,53 +108,67 @@ class _CoverSearchPageState extends State<CoverSearchPage> {
           actions: [
             IconButton(
                 onPressed: () {
-                  firstSearch(keywordController.text);
+                  _offset = 0;
+                  search(_keywordController.text, _offset);
                 },
                 icon: const Icon(Icons.search))
           ],
         ),
         body: ListView(
-          controller: scrollController,
+          controller: _scrollController,
           children: [
             Wrap(
               alignment: WrapAlignment.center,
-              children: covers,
+              children: _coverCards,
             ),
             Padding(
                 padding: const EdgeInsets.all(5),
-                child: isLoading
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                child: _noMoreSong
+                    ? const SizedBox(
+                        height: 50,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
                             Text(
-                              '加载中',
+                              '没有更多封面',
                               style: TextStyle(fontSize: 18),
-                            ),
-                            SizedBox(width: 10, height: 50),
-                            CircularProgressIndicator()
-                          ])
-                    : InkWell(
-                        splashFactory: NoSplash.splashFactory,
-                        highlightColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        onTap: () {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          nextSearch();
-                        },
-                        child: SizedBox(
-                          height: 50,
-                          child: Row(
+                            )
+                          ],
+                        ),
+                      )
+                    : (_isLoading
+                        ? const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
-                                '加载失败，点击重试',
-                                style: TextStyle(fontSize: 18),
-                              )
-                            ],
-                          ),
-                        )))
+                            children: [
+                                Text(
+                                  '加载中',
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                                SizedBox(width: 10, height: 50),
+                                CircularProgressIndicator()
+                              ])
+                        : InkWell(
+                            splashFactory: NoSplash.splashFactory,
+                            highlightColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            onTap: () {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              search(_keywordController.text, _offset);
+                            },
+                            child: const SizedBox(
+                              height: 50,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '加载失败，点击重试',
+                                    style: TextStyle(fontSize: 18),
+                                  )
+                                ],
+                              ),
+                            ))))
           ],
         ));
   }
@@ -210,6 +205,7 @@ class ImageCard extends StatelessWidget {
               await for (var data_ in response) {
                 data.addAll(data_);
               }
+              if (!context.mounted) return;
               Navigator.pop(context, Uint8List.fromList(data));
             } catch (e) {
               Fluttertoast.showToast(msg: '封面下载失败，请检查您的网络');

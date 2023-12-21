@@ -1,5 +1,14 @@
 part of 'taglib.dart';
 
+extension IterableExtension<E> on Iterable<E> {
+  E? firstWhereOrNull(bool Function(E element) test) {
+    for (E element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
+}
+
 class ID3Frame {
   ID3Frame(this.name, this.data);
   List<int> name;
@@ -106,126 +115,126 @@ class Mp3File {
     return true;
   }
 
-  String getTitle() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TIT2'.codeUnits)) {
-        return defaultReading(_frames[i].data);
+  String? getTitle() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'TIT2'.codeUnits)) {
+        return defaultReading(frame.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getArtist() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TPE1'.codeUnits)) {
-        return defaultReading(_frames[i].data);
+  String? getArtist() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'TPE1'.codeUnits)) {
+        return defaultReading(frame.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getAlbum() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TALB'.codeUnits)) {
-        return defaultReading(_frames[i].data);
+  String? getAlbum() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'TALB'.codeUnits)) {
+        return defaultReading(frame.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getAlbumArtist() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TPE2'.codeUnits)) {
-        return defaultReading(_frames[i].data);
+  String? getAlbumArtist() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'TPE2'.codeUnits)) {
+        return defaultReading(frame.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getLyric() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'USLT'.codeUnits)) {
-        switch (_frames[i].data.first) {
+  String? getLyric() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'USLT'.codeUnits)) {
+        switch (frame.data.first) {
           case 0x00:
-            return readLatin1(_frames[i].data.sublist(10));
+            return readLatin1(frame.data.sublist(10));
           case 0x01:
-            return readUtf16LeString(_frames[i].data.sublist(8));
+            return readUtf16LeString(frame.data.sublist(8));
           case 0x02:
-            return readUtf16BeString(_frames[i].data.sublist(8));
+            return readUtf16BeString(frame.data.sublist(8));
           case 0x03:
-            return readUtf8String(_frames[i].data.sublist(5));
+            return readUtf8String(frame.data.sublist(5));
         }
       }
     }
-    return '';
+    return null;
   }
 
-  String getComment() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'COMM'.codeUnits)) {
-        switch (_frames[i].data.first) {
+  String? getComment() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'COMM'.codeUnits)) {
+        switch (frame.data.first) {
           case 0x00:
-            return readLatin1(_frames[i].data.sublist(5));
+            return readLatin1(frame.data.sublist(5));
           case 0x01:
-            return readUtf16LeString(_frames[i].data.sublist(8));
+            return readUtf16LeString(frame.data.sublist(8));
           case 0x02:
-            return readUtf16BeString(_frames[i].data.sublist(8));
+            return readUtf16BeString(frame.data.sublist(8));
           case 0x03:
-            return readUtf8String(_frames[i].data.sublist(5));
+            return readUtf8String(frame.data.sublist(5));
         }
       }
     }
-    return '';
+    return null;
   }
 
-  Uint8List getCover() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'APIC'.codeUnits)) {
-        int mimeEnd = _frames[i].data.indexOf(0, 1);
-        int descriptionEnd = _frames[i].data.indexOf(0, mimeEnd + 2);
-        if ((_frames[i].data[0] == 0x01) | (_frames[i].data[0] == 0x02)) {
+  Uint8List? getCover() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'APIC'.codeUnits)) {
+        int mimeEnd = frame.data.indexOf(0, 1);
+        int descriptionEnd = frame.data.indexOf(0, mimeEnd + 2);
+        if ((frame.data[0] == 0x01) | (frame.data[0] == 0x02)) {
           descriptionEnd += 1;
         }
-        return Uint8List.fromList(_frames[i].data.sublist(descriptionEnd + 1));
+        return Uint8List.fromList(frame.data.sublist(descriptionEnd + 1));
       }
     }
-    return Uint8List(0);
+    return null;
   }
 
-  String getTrack() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TRCK'.codeUnits)) {
-        return defaultReading(_frames[i].data);
+  String? getTrack() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'TRCK'.codeUnits)) {
+        return defaultReading(frame.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getCD() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TPOS'.codeUnits)) {
-        return defaultReading(_frames[i].data);
+  String? getCD() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'TPOS'.codeUnits)) {
+        return defaultReading(frame.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getYear() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TYER'.codeUnits)) {
-        return defaultReading(_frames[i].data);
+  String? getYear() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'TYER'.codeUnits)) {
+        return defaultReading(frame.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getEncoder() {
-    for (int i = 0; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TENC'.codeUnits)) {
-        return defaultReading(_frames[i].data);
+  String? getEncoder() {
+    for (final frame in _frames) {
+      if (listEquals(frame.name, 'TENC'.codeUnits)) {
+        return defaultReading(frame.data);
       }
     }
-    return '';
+    return null;
   }
 
   String readLatin1(List<int> byteList) {
@@ -313,152 +322,264 @@ class Mp3File {
   //   }
   // }
 
-  void setTitle(String title) {
-    int i = 0;
-    var data = [0x03] + utf8.encode(title) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TIT2'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
-    }
-    if (i == _frames.length) _frames.add(ID3Frame('TIT2'.codeUnits, data));
-  }
-
-  void setArtist(String artist) {
-    int i = 0;
-    var data = [0x03] + utf8.encode(artist) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TPE1'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
-    }
-    if (i == _frames.length) _frames.add(ID3Frame('TPE1'.codeUnits, data));
-  }
-
-  void setAlbum(String album) {
-    int i = 0;
-    var data = [0x03] + utf8.encode(album) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TALB'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
-    }
-    if (i == _frames.length) _frames.add(ID3Frame('TALB'.codeUnits, data));
-  }
-
-  void setAlbumArtist(String albumArtist) {
-    int i = 0;
-    var data = [0x03] + utf8.encode(albumArtist) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TPE2'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
-    }
-    if (i == _frames.length) _frames.add(ID3Frame('TPE2'.codeUnits, data));
-  }
-
-  void setLyric(String lyric) {
-    int i = 0;
-    var data =
-        [0x03] + [0x00, 0x00, 0x00] + [0x00] + utf8.encode(lyric) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'USLT'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
-    }
-    if (i == _frames.length) _frames.add(ID3Frame('USLT'.codeUnits, data));
-  }
-
-  void setComment(String comment) {
-    int i = 0;
-    var data =
-        [0x03] + [0x00, 0x00, 0x00] + [0x00] + utf8.encode(comment) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'COMM'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
-    }
-    if (i == _frames.length) _frames.add(ID3Frame('COMM'.codeUnits, data));
-  }
-
-  void setCover(Uint8List cover) {
-    bool format = listEquals(cover.sublist(0, 2),
-        [0xff, 0xd8]); // JPG starts with 0xff 0xd8, PNG starts with 0x89 0x50
-    int i = 0;
-    var data = [0x03];
-    if (format) {
-      data += 'image/'.codeUnits +
-          'jpg'.codeUnits +
-          [0x00, 0x00, 0x00] +
-          cover +
-          [0x00];
+  void setTitle(String? title) {
+    if (title != null) {
+      var data = [0x03] + utf8.encode(title) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'TIT2'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('TIT2'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
     } else {
-      data += 'image/'.codeUnits +
-          'png'.codeUnits +
-          [0x00, 0x00, 0x00] +
-          cover +
-          [0x00];
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'TIT2'.codeUnits)));
     }
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'APIC'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
-    }
-    if (i == _frames.length) _frames.add(ID3Frame('APIC'.codeUnits, data));
+    // int i = 0;
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'TIT2'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('TIT2'.codeUnits, data));
   }
 
-  void setTrack(String track) {
-    int i = 0;
-    var data = [0x03] + utf8.encode(track) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TRCK'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
+  void setArtist(String? artist) {
+    if (artist != null) {
+      var data = [0x03] + utf8.encode(artist) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'TPE1'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('TPE1'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'TPE1'.codeUnits)));
     }
-    if (i == _frames.length) _frames.add(ID3Frame('TRCK'.codeUnits, data));
+    // int i = 0;
+    // var data = [0x03] + utf8.encode(artist) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'TPE1'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('TPE1'.codeUnits, data));
   }
 
-  void setCD(String cd) {
-    int i = 0;
-    var data = [0x03] + utf8.encode(cd) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TPOS'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
+  void setAlbum(String? album) {
+    if (album != null) {
+      var data = [0x03] + utf8.encode(album) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'TALB'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('TALB'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'TALB'.codeUnits)));
     }
-    if (i == _frames.length) _frames.add(ID3Frame('TPOS'.codeUnits, data));
+    // int i = 0;
+    // var data = [0x03] + utf8.encode(album) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'TALB'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('TALB'.codeUnits, data));
   }
 
-  void setYear(String year) {
-    int i = 0;
-    var data = [0x03] + utf8.encode(year) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TYER'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
+  void setAlbumArtist(String? albumArtist) {
+    if (albumArtist != null) {
+      var data = [0x03] + utf8.encode(albumArtist) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'TPE2'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('TPE2'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'TPE2'.codeUnits)));
     }
-    if (i == _frames.length) _frames.add(ID3Frame('TYER'.codeUnits, data));
+    // int i = 0;
+    // var data = [0x03] + utf8.encode(albumArtist) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'TPE2'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('TPE2'.codeUnits, data));
   }
 
-  void setEncoder(String encoder) {
-    int i = 0;
-    var data = [0x03] + utf8.encode(encoder) + [0x00];
-    for (; i < _frames.length; i++) {
-      if (listEquals(_frames[i].name, 'TENC'.codeUnits)) {
-        _frames[i].data = data;
-        break;
-      }
+  void setLyric(String? lyric) {
+    if (lyric != null) {
+      var data =
+          [0x03] + [0x00, 0x00, 0x00] + [0x00] + utf8.encode(lyric) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'USLT'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('USLT'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'USLT'.codeUnits)));
     }
-    if (i == _frames.length) _frames.add(ID3Frame('TENC'.codeUnits, data));
+    // int i = 0;
+    // var data =
+    //     [0x03] + [0x00, 0x00, 0x00] + [0x00] + utf8.encode(lyric) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'USLT'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('USLT'.codeUnits, data));
+  }
+
+  void setComment(String? comment) {
+    if (comment != null) {
+      var data = [0x03] + utf8.encode(comment) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'COMM'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('COMM'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'COMM'.codeUnits)));
+    }
+    // int i = 0;
+    // var data =
+    //     [0x03] + [0x00, 0x00, 0x00] + [0x00] + utf8.encode(comment) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'COMM'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('COMM'.codeUnits, data));
+  }
+
+  void setCover(Uint8List? cover) {
+    if (cover != null) {
+      bool format = listEquals(cover.sublist(0, 2),
+          [0xff, 0xd8]); // JPG starts with 0xff 0xd8, PNG starts with 0x89 0x50
+      var data = [0x03];
+      if (format) {
+        data += 'image/'.codeUnits +
+            'jpg'.codeUnits +
+            [0x00, 0x00, 0x00] +
+            cover +
+            [0x00];
+      } else {
+        data += 'image/'.codeUnits +
+            'png'.codeUnits +
+            [0x00, 0x00, 0x00] +
+            cover +
+            [0x00];
+      }
+      _frames.firstWhere((frame) => listEquals(frame.name, 'APIC'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('APIC'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'APIC'.codeUnits)));
+    }
+  }
+
+  void setTrack(String? track) {
+    if (track != null) {
+      var data = [0x03] + utf8.encode(track) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'TRCK'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('TRCK'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'TRCK'.codeUnits)));
+    }
+    // int i = 0;
+    // var data = [0x03] + utf8.encode(track) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'TRCK'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('TRCK'.codeUnits, data));
+  }
+
+  void setCD(String? cd) {
+    if (cd != null) {
+      var data = [0x03] + utf8.encode(cd) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'TPOS'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('TPOS'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'TPOS'.codeUnits)));
+    }
+    // int i = 0;
+    // var data = [0x03] + utf8.encode(cd) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'TPOS'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('TPOS'.codeUnits, data));
+  }
+
+  void setYear(String? year) {
+    if (year != null) {
+      var data = [0x03] + utf8.encode(year) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'TYER'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('TYER'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'TYER'.codeUnits)));
+    }
+    // int i = 0;
+    // var data = [0x03] + utf8.encode(year) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'TYER'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('TYER'.codeUnits, data));
+  }
+
+  void setEncoder(String? encoder) {
+    if (encoder != null) {
+      var data = [0x03] + utf8.encode(encoder) + [0x00];
+      _frames.firstWhere((frame) => listEquals(frame.name, 'TENC'.codeUnits),
+          orElse: () {
+        _frames.add(ID3Frame('TENC'.codeUnits, List.empty()));
+        return _frames.last;
+      }).data = data;
+    } else {
+      _frames.remove(_frames.firstWhereOrNull(
+          (frame) => listEquals(frame.name, 'TENC'.codeUnits)));
+    }
+    // int i = 0;
+    // var data = [0x03] + utf8.encode(encoder) + [0x00];
+    // for (; i < _frames.length; i++) {
+    //   if (listEquals(_frames[i].name, 'TENC'.codeUnits)) {
+    //     _frames[i].data = data;
+    //     break;
+    //   }
+    // }
+    // if (i == _frames.length) _frames.add(ID3Frame('TENC'.codeUnits, data));
   }
 }

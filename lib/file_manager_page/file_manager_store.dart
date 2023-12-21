@@ -30,11 +30,11 @@ abstract class FileManagerStoreBase with Store {
   }
 
   @observable
-  bool reserved = true;
+  bool descendingOrder = true;
 
   @action
   void reserve() {
-    reserved = !reserved;
+    descendingOrder = !descendingOrder;
     switch (sortOrder) {
       case SortOrder.byName:
         sortByName();
@@ -83,7 +83,7 @@ abstract class FileManagerStoreBase with Store {
         files.add(element);
       }
     }
-    if (reserved) {
+    if (!descendingOrder) {
       dirs.sort((element1, element2) =>
           basename(element1.path).compareTo(basename(element2.path)));
       files.sort((element1, element2) =>
@@ -108,7 +108,7 @@ abstract class FileManagerStoreBase with Store {
         files.add(element);
       }
     }
-    if (reserved) {
+    if (!descendingOrder) {
       dirs.sort((element1, element2) =>
           element1.statSync().modified.compareTo(element2.statSync().modified));
       files.sort((element1, element2) =>

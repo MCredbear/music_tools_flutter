@@ -1,191 +1,118 @@
 import 'dart:io';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'editor_page.dart';
-
-import 'file_manager_store.dart';
+import 'package:music_tools_flutter/file_manager_page/file_manager_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isAndroid) {
-    while (true) {
-      var result = await Permission.storage.request();
-      if (result.isGranted) break;
-    }
-  }
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isPermissionGranted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Permission.manageExternalStorage.status.then((value) {
+      if (value == PermissionStatus.granted) {
+        setState(() {
+          _isPermissionGranted = true;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Music tools Flutter',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: const FileManagerPage());
-  }
-}
-
-class FileManagerPage extends StatefulWidget {
-  const FileManagerPage({super.key});
-
-  @override
-  State<FileManagerPage> createState() => FileManagerPageState();
-}
-
-class FileManagerPageState extends State<FileManagerPage> {
-  FileManagerStore fileManagerStore = FileManagerStore();
-
-  List<String> pathsQueue = [];
-
-  @override
-  void initState() {
-    if(Platform.isAndroid) {
-      getExternalStorageDirectories().then((value) { // TODO: Add multi-storage option
-        pathsQueue.add(value!.first.parent.parent.parent.parent.path);
-        fileManagerStore.readDir(pathsQueue.last);
-      });
-    }
-    else {
-      getApplicationDocumentsDirectory().then((value) {
-        pathsQueue.add(value.parent.path);
-        fileManagerStore.readDir(pathsQueue.last);
-      });
-    }
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Music tools Flutter"),
-        actions: [
-          PopupMenuButton(
-              icon: const Icon(Icons.sort),
-              splashRadius: 24,
-              itemBuilder: (BuildContext context) => [
-                    PopupMenuItem(
-                        padding: EdgeInsets.zero,
-                        child: Column(
-                          children: [
-                            Observer(builder: (context) {
-                              return CheckboxListTile(
-                                title: const Text('升序'),
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
-                                value: fileManagerStore.reserved,
-                                onChanged: (value) =>
-                                    fileManagerStore.reserve(),
-                              );
-                            }),
-                            const Divider(height: 1)
-                          ],
-                        )),
-                    PopupMenuItem(
-                        padding: EdgeInsets.zero,
-                        child: Observer(builder: (context) {
-                          return CheckboxListTile(
-                            title: const Text('按名称排序'),
-                            checkboxShape: const CircleBorder(),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            value:
-                                fileManagerStore.sortOrder == SortOrder.byName,
-                            onChanged: (value) =>
-                                fileManagerStore.setOrder(SortOrder.byName),
-                          );
-                        })),
-                    PopupMenuItem(
-                        padding: EdgeInsets.zero,
-                        child: Observer(builder: (context) {
-                          return CheckboxListTile(
-                            title: const Text('按修改时间排序'),
-                            checkboxShape: const CircleBorder(),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            value: fileManagerStore.sortOrder ==
-                                SortOrder.byModifiedTime,
-                            onChanged: (value) => fileManagerStore
-                                .setOrder(SortOrder.byModifiedTime),
-                          );
-                        })),
-                  ]),
-          IconButton(
-              splashRadius: 24,
-              onPressed: (() {
-                if (pathsQueue.length > 1) pathsQueue.removeLast();
-                fileManagerStore.readDir(pathsQueue.last);
-              }),
-              icon: const Icon(Icons.keyboard_arrow_left_sharp)),
-          IconButton(
-              splashRadius: 24,
-              onPressed: (() {
-                fileManagerStore.readDir(pathsQueue.last);
-              }),
-              icon: const Icon(Icons.refresh)),
-          IconButton(
-              splashRadius: 24,
-              onPressed: (() {
-                pathsQueue.add(dirname(pathsQueue.last));
-                fileManagerStore.readDir(pathsQueue.last);
-              }),
-              icon: const Icon(Icons.arrow_upward))
-        ],
-      ),
-      body: Center(
-          child: Observer(
-              builder: (_) => ListView.builder(
-                    itemCount: fileManagerStore.elements.length,
-                    itemBuilder: (context, index) => SizedBox(
-                      height: 60,
-                      child: ListTile(
-                        onTap: (() {
-                          if (fileManagerStore.elements.elementAt(index)
-                              is Directory) {
-                            pathsQueue.add(fileManagerStore.elements
-                                .elementAt(index)
-                                .path);
-                            fileManagerStore.readDir(pathsQueue.last);
-                          } else {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EditorPage(
-                                        fileManagerStore.elements
-                                            .elementAt(index)
-                                            .path)));
-                          }
-                        }),
-                        leading: (fileManagerStore.elements.elementAt(index)
-                                is Directory)
-                            ? const Icon(
-                                Icons.folder,
-                                size: 30,
-                              )
-                            : const Icon(
-                                Icons.audio_file,
-                                size: 30,
-                              ),
-                        title: Text(
-                          basename(
-                              fileManagerStore.elements.elementAt(index).path),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(fileManagerStore.elements
-                            .elementAt(index)
-                            .statSync()
-                            .modified
-                            .toString()),
-                      ),
+        theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
+        home: _isPermissionGranted
+            ? const FileManagerPage()
+            : Scaffold(
+                appBar: AppBar(
+                  title: const Text('获取文件访问权限'),
+                ),
+                body: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              if (Platform.isAndroid) {
+                                requestPermission(context);
+                              }
+                            },
+                            child: const Text(
+                              '点击获取本应用所需的权限',
+                              textAlign: TextAlign.center,
+                            )),
+                      ],
                     ),
-                  ))),
-    );
+                  ],
+                ),
+              ));
+  }
+
+  void requestPermission(BuildContext context) {
+    Permission.manageExternalStorage.onGrantedCallback(() {
+      setState(() {
+        _isPermissionGranted = true;
+      });
+    }).onDeniedCallback(() {
+      setState(() {
+        _isPermissionGranted = false;
+      });
+    }).onPermanentlyDeniedCallback(() {
+      requestPermissionManually(context).then((value) {
+        requestPermission(context);
+      });
+    }).onRestrictedCallback(() {
+      requestPermissionManually(context).then((value) {
+        requestPermission(context);
+      });
+    }).onLimitedCallback(() {
+      requestPermissionManually(context).then((value) {
+        requestPermission(context);
+      });
+    }).onProvisionalCallback(() {
+      requestPermissionManually(context).then((value) {
+        requestPermission(context);
+      });
+    }).request();
+  }
+
+  Future<dynamic> requestPermissionManually(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('获取权限失败'),
+            content: const Text('请手动为应用获取文件访问权限'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('取消')),
+              TextButton(
+                  onPressed: () {
+                    openAppSettings();
+                  },
+                  child: const Text('确定')),
+            ],
+          );
+        });
   }
 }

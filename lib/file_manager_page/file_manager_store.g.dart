@@ -42,15 +42,15 @@ mixin _$FileManagerStore on FileManagerStoreBase, Store {
   late final _$reservedAtom = Atom(name: 'FileManagerStoreBase.reserved');
 
   @override
-  bool get reserved {
+  bool get descendingOrder {
     _$reservedAtom.reportRead();
-    return super.reserved;
+    return super.descendingOrder;
   }
 
   @override
-  set reserved(bool value) {
-    _$reservedAtom.reportWrite(value, super.reserved, () {
-      super.reserved = value;
+  set descendingOrder(bool value) {
+    _$reservedAtom.reportWrite(value, super.descendingOrder, () {
+      super.descendingOrder = value;
     });
   }
 
@@ -95,7 +95,7 @@ mixin _$FileManagerStore on FileManagerStoreBase, Store {
     return '''
 elements: ${elements},
 sortOrder: ${sortOrder},
-reserved: ${reserved}
+reserved: ${descendingOrder}
     ''';
   }
 }

@@ -85,55 +85,55 @@ class VorbisCommentBlock {
         vendorLengthBytes + vendor + commentsCountBytes + commentsData;
   }
 
-  String getTitle() {
-    for (var comment in _comments) {
+  String? getTitle() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'TITLE'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getArtist() {
-    for (var comment in _comments) {
+  String? getArtist() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'ARTIST'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getAlbum() {
-    for (var comment in _comments) {
+  String? getAlbum() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'ALBUM'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getAlbumArtist() {
-    for (var comment in _comments) {
+  String? getAlbumArtist() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'ALBUMARTIST'.codeUnits)) {
         return utf8.decode(comment.data);
       } else if (listEquals(comment.name, 'ALBUM_ARTIST'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getLyric() {
-    for (var comment in _comments) {
+  String? getLyric() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'LYRICS'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getComment() {
-    for (var comment in _comments) {
+  String? getComment() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'DESCRIPTION'.codeUnits)) {
         return utf8.decode(comment.data);
       } else if (listEquals(comment.name, 'COMMENT'.codeUnits)) {
@@ -143,149 +143,210 @@ class VorbisCommentBlock {
     return '';
   }
 
-  String getTrack() {
-    for (var comment in _comments) {
+  String? getTrack() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'TRACKNUMBER'.codeUnits)) {
         return utf8.decode(comment.data);
       } else if (listEquals(comment.name, 'TRACKNUM'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getCD() {
-    for (var comment in _comments) {
+  String? getCD() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'DISCNUMBER'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getYear() {
-    for (var comment in _comments) {
+  String? getYear() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'DATE'.codeUnits)) {
         return utf8.decode(comment.data);
       } else if (listEquals(comment.name, 'YEAR'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  String getEncoder() {
-    for (var comment in _comments) {
+  String? getEncoder() {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'ENCODER'.codeUnits)) {
         return utf8.decode(comment.data);
       }
     }
-    return '';
+    return null;
   }
 
-  void setTitle(String title) {
-    for (var comment in _comments) {
+  void setTitle(String? title) {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'TITLE'.codeUnits)) {
-        comment.data = utf8.encode(title);
+        (title != null)
+            ? comment.data = utf8.encode(title)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments.add(VorbisComment('TITLE'.codeUnits, utf8.encode(title)));
+    if (title != null) {
+      _comments.add(VorbisComment('TITLE'.codeUnits, utf8.encode(title)));
+    }
   }
 
-  void setArtist(String artist) {
-    for (var comment in _comments) {
+  void setArtist(String? artist) {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'ARTIST'.codeUnits)) {
-        comment.data = utf8.encode(artist);
+        (artist != null)
+            ? comment.data = utf8.encode(artist)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments.add(VorbisComment('ARTIST'.codeUnits, utf8.encode(artist)));
+    if (artist != null) {
+      _comments.add(VorbisComment('ARTIST'.codeUnits, utf8.encode(artist)));
+    }
   }
 
-  void setAlbum(String album) {
-    for (var comment in _comments) {
+  void setAlbum(String? album) {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'ALBUM'.codeUnits)) {
-        comment.data = utf8.encode(album);
+        (album != null)
+            ? comment.data = utf8.encode(album)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments.add(VorbisComment('ALBUM'.codeUnits, utf8.encode(album)));
+    if (album != null) {
+      _comments.add(VorbisComment('ALBUM'.codeUnits, utf8.encode(album)));
+    }
   }
 
-  void setAlbumArtist(String albumArtist) {
-    for (var comment in _comments) {
-      if (listEquals(comment.name, 'ALBUMARTIST'.codeUnits) |
-          listEquals(comment.name, 'ALBUM_ARTIST'.codeUnits)) {
-        comment.data = utf8.encode(albumArtist);
+  void setAlbumArtist(String? albumArtist) {
+    for (final comment in _comments) {
+      if (listEquals(comment.name, 'ALBUMARTIST'.codeUnits)) {
+        (albumArtist != null)
+            ? comment.data = utf8.encode(albumArtist)
+            : _comments.remove(comment);
+        return;
+      }
+      if (listEquals(comment.name, 'ALBUM_ARTIST'.codeUnits)) {
+        (albumArtist != null)
+            ? comment.data = utf8.encode(albumArtist)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments
-        .add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(albumArtist)));
+    if (albumArtist != null) {
+      _comments.add(
+          VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(albumArtist)));
+    }
   }
 
-  void setLyric(String lyric) {
-    for (var comment in _comments) {
+  void setLyric(String? lyric) {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'LYRICS'.codeUnits)) {
-        comment.data = utf8.encode(lyric);
+        (lyric != null)
+            ? comment.data = utf8.encode(lyric)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments.add(VorbisComment('LYRICS'.codeUnits, utf8.encode(lyric)));
+    if (lyric != null) {
+      _comments.add(VorbisComment('LYRICS'.codeUnits, utf8.encode(lyric)));
+    }
   }
 
-  void setComment(String comment) {
-    for (var comment_ in _comments) {
-      if (listEquals(comment_.name, 'DESCRIPTION'.codeUnits) |
-          listEquals(comment_.name, 'COMMENT'.codeUnits)) {
-        comment_.data = utf8.encode(comment);
+  void setComment(String? comment) {
+    for (final comment_ in _comments) {
+      if (listEquals(comment_.name, 'DESCRIPTION'.codeUnits)) {
+        (comment != null)
+            ? comment_.data = utf8.encode(comment)
+            : _comments.remove(comment_);
+        return;
+      }
+      if (listEquals(comment_.name, 'COMMENT'.codeUnits)) {
+        (comment != null)
+            ? comment_.data = utf8.encode(comment)
+            : _comments.remove(comment_);
         return;
       }
     }
-    _comments.add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(comment)));
+    if (comment != null) {
+      _comments
+          .add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(comment)));
+    }
   }
 
-  void setTrack(String track) {
-    for (var comment_ in _comments) {
-      if (listEquals(comment_.name, 'TRACKNUMBER'.codeUnits) |
-          listEquals(comment_.name, 'TRACKNUM'.codeUnits)) {
-        comment_.data = utf8.encode(track);
+  void setTrack(String? track) {
+    for (final comment in _comments) {
+      if (listEquals(comment.name, 'TRACKNUMBER'.codeUnits)) {
+        (track != null)
+            ? comment.data = utf8.encode(track)
+            : _comments.remove(comment);
+        return;
+      }
+      if (listEquals(comment.name, 'TRACKNUM'.codeUnits)) {
+        (track != null)
+            ? comment.data = utf8.encode(track)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments.add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(track)));
+    if (track != null) {
+      _comments.add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(track)));
+    }
   }
 
-  void setCD(String cd) {
-    for (var comment in _comments) {
+  void setCD(String? cd) {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'DISCNUMBER'.codeUnits)) {
-        comment.data = utf8.encode(cd);
+        (cd != null)
+            ? comment.data = utf8.encode(cd)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments.add(VorbisComment('DISCNUMBER'.codeUnits, utf8.encode(cd)));
+    if (cd != null) {
+      _comments.add(VorbisComment('DISCNUMBER'.codeUnits, utf8.encode(cd)));
+    }
   }
 
-  void setYear(String year) {
-    for (var comment_ in _comments) {
-      if (listEquals(comment_.name, 'DATE'.codeUnits) |
-          listEquals(comment_.name, 'YEAR'.codeUnits)) {
-        comment_.data = utf8.encode(year);
+  void setYear(String? year) {
+    for (final comment in _comments) {
+      if (listEquals(comment.name, 'DATE'.codeUnits)) {
+        (year != null)
+            ? comment.data = utf8.encode(year)
+            : _comments.remove(comment);
+        return;
+      }
+      if (listEquals(comment.name, 'YEAR'.codeUnits)) {
+        (year != null)
+            ? comment.data = utf8.encode(year)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments.add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(year)));
+    if (year != null) {
+      _comments.add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(year)));
+    }
   }
 
-  void setEncoder(String encoder) {
-    for (var comment in _comments) {
+  void setEncoder(String? encoder) {
+    for (final comment in _comments) {
       if (listEquals(comment.name, 'ENCODER'.codeUnits)) {
-        comment.data = utf8.encode(encoder);
+        (encoder != null)
+            ? comment.data = utf8.encode(encoder)
+            : _comments.remove(comment);
         return;
       }
     }
-    _comments.add(VorbisComment('ENCODER'.codeUnits, utf8.encode(encoder)));
+    if (encoder != null) {
+      _comments.add(VorbisComment('ENCODER'.codeUnits, utf8.encode(encoder)));
+    }
   }
 }
 
@@ -304,38 +365,44 @@ class PictureBlock {
   }
 
   final FlacMetaBlock _flacMetaBlock;
-  Uint8List _cover = Uint8List(0);
+  Uint8List? _cover;
 
   void save() {
-    // In fact, only image's byte data matters, the other information is usually ignored, even the MIME type.
-    List<int> data = [0x00, 0x00, 0x00, 0x03] + // image type (use as)
-        [0x00, 0x00, 0x00, 0x0a] + // MIME length
-        'image/jpeg'.codeUnits + // MIME type
-        [0x00, 0x00, 0x00, 0x00] + // description length
-        [] + // description
-        [0x00, 0x00, 0x00, 0x00] + // image width
-        [0x00, 0x00, 0x00, 0x00] + // image height
-        [0x00, 0x00, 0x00, 0x00] + // color digit
-        [0x00, 0x00, 0x00, 0x00]; // index image's color's count
-    // image size
-    int imageSize = _cover.length;
-    data.add(imageSize >> 24);
-    imageSize %= 0x1000000;
-    data.add(imageSize >> 16);
-    imageSize %= 0x10000;
-    data.add(imageSize >> 8);
-    imageSize %= 0x100;
-    data.add(imageSize);
+    if (_cover != null) {
+      if (_cover!.isNotEmpty) {
+        // In fact, only image's byte data matters, the other information is usually ignored, even the MIME type.
+        List<int> data = [0x00, 0x00, 0x00, 0x03] + // image type (use as)
+            [0x00, 0x00, 0x00, 0x0a] + // MIME length
+            'image/jpeg'.codeUnits + // MIME type
+            [0x00, 0x00, 0x00, 0x00] + // description length
+            [] + // description
+            [0x00, 0x00, 0x00, 0x00] + // image width
+            [0x00, 0x00, 0x00, 0x00] + // image height
+            [0x00, 0x00, 0x00, 0x00] + // color digit
+            [0x00, 0x00, 0x00, 0x00]; // index image's color's count
+        // image size
+        int imageSize = _cover!.length;
+        data.add(imageSize >> 24);
+        imageSize %= 0x1000000;
+        data.add(imageSize >> 16);
+        imageSize %= 0x10000;
+        data.add(imageSize >> 8);
+        imageSize %= 0x100;
+        data.add(imageSize);
 
-    data += _cover;
-    _flacMetaBlock.data = data;
+        data += _cover!;
+        _flacMetaBlock.data = data;
+        return;
+      }
+    }
+    _flacMetaBlock.data = [];
   }
 
-  Uint8List getCover() {
+  Uint8List? getCover() {
     return _cover;
   }
 
-  void setCover(Uint8List cover) {
+  void setCover(Uint8List? cover) {
     _cover = cover;
   }
 }
@@ -372,7 +439,9 @@ class FlacFile {
       if (type == 4) {
         _vorbisCommentBlock = VorbisCommentBlock(_flacMetaBlocks.last);
       }
-      if (type == 6) _pictureBlock = PictureBlock(_flacMetaBlocks.last);
+      if (type == 6) {
+        _pictureBlock = PictureBlock(_flacMetaBlocks.last);
+      }
     }
     randomAccessFile.closeSync();
     return true;
@@ -424,181 +493,214 @@ class FlacFile {
     return true;
   }
 
-  String getTitle() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getTitle();
-    return '';
+  String? getTitle() => _vorbisCommentBlock?.getTitle();
+
+  String? getArtist() => _vorbisCommentBlock?.getArtist();
+
+  String? getAlbum() {
+    return _vorbisCommentBlock?.getAlbum();
   }
 
-  String getArtist() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getArtist();
-    return '';
+  String? getAlbumArtist() {
+    return _vorbisCommentBlock?.getAlbumArtist();
   }
 
-  String getAlbum() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getAlbum();
-    return '';
-  }
+  String? getComment() => _vorbisCommentBlock?.getComment();
 
-  String getAlbumArtist() {
-    if (_vorbisCommentBlock != null) {
-      return _vorbisCommentBlock!.getAlbumArtist();
-    }
-    return '';
-  }
+  Uint8List? getCover() => _pictureBlock?.getCover();
 
-  String getComment() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getComment();
-    return '';
-  }
+  String? getLyric() => _vorbisCommentBlock?.getLyric();
 
-  Uint8List getCover() {
-    if (_pictureBlock != null) return _pictureBlock!.getCover();
-    return Uint8List(0);
-  }
+  String? getTrack() => _vorbisCommentBlock?.getTrack();
 
-  String getLyric() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getLyric();
-    return '';
-  }
+  String? getCD() => _vorbisCommentBlock?.getCD();
 
-  String getTrack() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getTrack();
-    return '';
-  }
+  String? getYear() => _vorbisCommentBlock?.getYear();
 
-  String getCD() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getCD();
-    return '';
-  }
+  String? getEncoder() => _vorbisCommentBlock?.getCD();
 
-  String getYear() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getYear();
-    return '';
-  }
-
-  String getEncoder() {
-    if (_vorbisCommentBlock != null) return _vorbisCommentBlock!.getCD();
-    return '';
-  }
-
-  void setTitle(String title) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setTitle(title);
+  void setTitle(String? title) {
+    if (title != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setTitle(title);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setTitle(title);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setTitle(title);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setTitle(title);
+      }
     }
   }
 
-  void setArtist(String artist) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setArtist(artist);
+  void setArtist(String? artist) {
+    if (artist != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setArtist(artist);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setArtist(artist);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setArtist(artist);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setArtist(artist);
+      }
     }
   }
 
-  void setAlbum(String album) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setAlbum(album);
+  void setAlbum(String? album) {
+    if (album != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setAlbum(album);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setAlbum(album);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setAlbum(album);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setAlbum(album);
+      }
     }
   }
 
-  void setAlbumArtist(String albumArtist) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setAlbumArtist(albumArtist);
+  void setAlbumArtist(String? albumArtist) {
+    if (albumArtist != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setAlbumArtist(albumArtist);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setAlbumArtist(albumArtist);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setAlbumArtist(albumArtist);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setAlbumArtist(albumArtist);
+      }
     }
   }
 
-  void setLyric(String lyric) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setLyric(lyric);
+  void setLyric(String? lyric) {
+    if (lyric != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setLyric(lyric);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setLyric(lyric);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setLyric(lyric);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setLyric(lyric);
+      }
     }
   }
 
-  void setComment(String comment) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setComment(comment);
+  void setComment(String? comment) {
+    if (comment != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setComment(comment);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setComment(comment);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setComment(comment);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setComment(comment);
+      }
     }
   }
 
-  void setCover(Uint8List cover) {
-    if (_pictureBlock != null) {
-      _pictureBlock!.setCover(cover);
+  void setCover(Uint8List? cover) {
+    if (cover != null) {
+      if (_pictureBlock != null) {
+        _pictureBlock!.setCover(cover);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(6, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _pictureBlock = PictureBlock(flacMetaBlock);
+        _pictureBlock!.setCover(cover);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(6, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _pictureBlock = PictureBlock(flacMetaBlock);
-      _pictureBlock!.setCover(cover);
+      if (_pictureBlock != null) {
+        _pictureBlock!.setCover(cover);
+      }
     }
   }
 
-  void setTrack(String track) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setTrack(track);
+  void setTrack(String? track) {
+    if (track != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setTrack(track);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setTrack(track);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setTrack(track);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setTrack(track);
+      }
     }
   }
 
-  void setCD(String cd) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setCD(cd);
+  void setCD(String? cd) {
+    if (cd != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setCD(cd);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setCD(cd);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setCD(cd);
+      if (_vorbisCommentBlock != null) _vorbisCommentBlock!.setCD(cd);
     }
   }
 
-  void setYear(String year) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setYear(year);
+  void setYear(String? year) {
+    if (year != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setYear(year);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setYear(year);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setYear(year);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setYear(year);
+      }
     }
   }
 
-  void setEncoder(String encoder) {
-    if (_vorbisCommentBlock != null) {
-      _vorbisCommentBlock!.setEncoder(encoder);
+  void setEncoder(String? encoder) {
+    if (encoder != null) {
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setEncoder(encoder);
+      } else {
+        final flacMetaBlock = FlacMetaBlock(4, []);
+        _flacMetaBlocks.add(flacMetaBlock);
+        _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
+        _vorbisCommentBlock!.setEncoder(encoder);
+      }
     } else {
-      final flacMetaBlock = FlacMetaBlock(4, []);
-      _flacMetaBlocks.add(flacMetaBlock);
-      _vorbisCommentBlock = VorbisCommentBlock(flacMetaBlock);
-      _vorbisCommentBlock!.setEncoder(encoder);
+      if (_vorbisCommentBlock != null) {
+        _vorbisCommentBlock!.setEncoder(encoder);
+      }
     }
   }
 }
