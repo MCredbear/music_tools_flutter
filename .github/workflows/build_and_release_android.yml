@@ -1,0 +1,36 @@
+name: Build And Release Android
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2.12.0
+        with:
+          flutter-version: '3.17.0-1.0.pre.38'
+          channel: 'master'
+          
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4.0.0
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+
+      - run: flutter pub get
+      - run: flutter build apk --release
+
+      - name: Release
+        uses: ncipollo/release-action@v1.13.0
+        with:
+          artifacts: "build/app/outputs/flutter-apk/app-release.apk"
+          tag: '1.0.0+1'
+          token: ${{ secrets.YOUR_GITHUB_TOKEN }}
+
