@@ -73,6 +73,15 @@ abstract class FileManagerStoreBase with Store {
     }
   }
 
+  // @action
+  // void search(String keyword){
+  //   ObservableList<FileSystemEntity> newElements = ObservableList();
+  //   for (final element in elements){
+  //     if (basename(element.path).contains(RegExp(keyword,caseSensitive: false))) newElements.add(element);
+  //   }
+  //   elements = newElements;
+  // }
+
   void sortByName() {
     ObservableList<FileSystemEntity> dirs = ObservableList();
     ObservableList<FileSystemEntity> files = ObservableList();
@@ -123,3 +132,5 @@ abstract class FileManagerStoreBase with Store {
     elements.addAll(files);
   }
 }
+
+final FileManagerStore fileManagerStore = FileManagerStore();

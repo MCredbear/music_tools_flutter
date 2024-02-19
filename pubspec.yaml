@@ -1,5 +1,5 @@
 name: music_tools_flutter
-description: A new Flutter project.
+description: A tool to edit tag of audio files, based on flutter.
 publish_to: 'none'
 
 version: 1.0.0+1
