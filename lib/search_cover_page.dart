@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CoverSearchPage extends StatefulWidget {
   const CoverSearchPage(this.keyword, {super.key});
@@ -83,7 +82,7 @@ class _CoverSearchPageState extends State<CoverSearchPage> {
       setState(() {
         _isLoading = false;
       });
-      Fluttertoast.showToast(msg: '获取失败，请检查您的网络');
+      // Fluttertoast.showToast(msg: '获取失败，请检查您的网络');
     }
   }
 
@@ -208,7 +207,7 @@ class ImageCard extends StatelessWidget {
               if (!context.mounted) return;
               Navigator.pop(context, Uint8List.fromList(data));
             } catch (e) {
-              Fluttertoast.showToast(msg: '封面下载失败，请检查您的网络');
+              // Fluttertoast.showToast(msg: '封面下载失败，请检查您的网络');
             }
           },
           child: Column(

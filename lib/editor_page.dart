@@ -61,35 +61,7 @@ class EditorPageState extends State<EditorPage> {
         ),
         actions: [
           IconButton(
-              splashRadius: 24,
-              onPressed: (() {
-                _audioFile.setTitle(_titleController.text.isNotEmpty
-                    ? _titleController.text
-                    : null);
-                _audioFile.setAlbum(_albumController.text.isNotEmpty
-                    ? _albumController.text
-                    : null);
-                _audioFile.setArtist(_artistController.text.isNotEmpty
-                    ? _artistController.text
-                    : null);
-                _audioFile.setAlbumArtist(_albumArtistController.text.isNotEmpty
-                    ? _albumArtistController.text
-                    : null);
-                _audioFile.setCD(
-                    _cdController.text.isNotEmpty ? _cdController.text : null);
-                _audioFile.setTrack(_trackController.text.isNotEmpty
-                    ? _trackController.text
-                    : null);
-                _audioFile.setLyric(_lyricController.text.isNotEmpty
-                    ? _lyricController.text
-                    : null);
-                _audioFile.setComment(_commentController.text.isNotEmpty
-                    ? _commentController.text
-                    : null);
-                _audioFile.setCover(_cover);
-                _audioFile.save();
-              }),
-              icon: const Icon(Icons.save)),
+              splashRadius: 24, onPressed: save, icon: const Icon(Icons.save)),
         ],
       ),
       body: Center(
@@ -331,5 +303,26 @@ class EditorPageState extends State<EditorPage> {
         ),
       ),
     );
+  }
+
+  Future<void> save() async {
+    _audioFile.setTitle(
+        _titleController.text.isNotEmpty ? _titleController.text : null);
+    _audioFile.setAlbum(
+        _albumController.text.isNotEmpty ? _albumController.text : null);
+    _audioFile.setArtist(
+        _artistController.text.isNotEmpty ? _artistController.text : null);
+    _audioFile.setAlbumArtist(_albumArtistController.text.isNotEmpty
+        ? _albumArtistController.text
+        : null);
+    _audioFile.setCD(_cdController.text.isNotEmpty ? _cdController.text : null);
+    _audioFile.setTrack(
+        _trackController.text.isNotEmpty ? _trackController.text : null);
+    _audioFile.setLyric(
+        _lyricController.text.isNotEmpty ? _lyricController.text : null);
+    _audioFile.setComment(
+        _commentController.text.isNotEmpty ? _commentController.text : null);
+    _audioFile.setCover(_cover);
+    _audioFile.save();
   }
 }

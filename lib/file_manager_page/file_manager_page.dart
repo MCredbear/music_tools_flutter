@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 
 import '../editor_page.dart';
@@ -9,40 +8,31 @@ import '../editor_page.dart';
 import 'file_manager_store.dart';
 
 class FileManagerPage extends StatefulWidget {
-  const FileManagerPage({super.key});
+  const FileManagerPage(this.initalPath, {super.key});
+
+  final String initalPath;
 
   @override
   State<FileManagerPage> createState() => FileManagerPageState();
 }
 
 class FileManagerPageState extends State<FileManagerPage> {
-  final List<String> _pathsQueue = [];
-
   @override
   void initState() {
-    if (Platform.isAndroid) {
-      getExternalStorageDirectories().then((value) {
-        _pathsQueue
-            .add('${value!.first.parent.parent.parent.parent.path}/Music');
-        fileManagerStore.readDir(_pathsQueue.last);
-      });
-    } else {
-      getApplicationDocumentsDirectory().then((value) {
-        _pathsQueue.add(value.parent.path);
-        fileManagerStore.readDir(_pathsQueue.last);
-      });
-    }
     super.initState();
+    fileManagerStore.pathsQueue.clear();
+    fileManagerStore.pathsQueue.add(widget.initalPath);
+    fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (value) {
-        if (_pathsQueue.length > 1) {
-          _pathsQueue.removeLast();
-          fileManagerStore.readDir(_pathsQueue.last);
+      onPopInvokedWithResult: (b, d) {
+        if (fileManagerStore.pathsQueue.length > 1) {
+          fileManagerStore.pathsQueue.removeLast();
+          fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
         } else {
           exit(0);
         }
@@ -50,10 +40,11 @@ class FileManagerPageState extends State<FileManagerPage> {
       child: Scaffold(
         floatingActionButton: Column(mainAxisSize: MainAxisSize.min, children: [
           FloatingActionButton(
+              heroTag: 'previous',
               onPressed: () {
-                if (_pathsQueue.length > 1) {
-                  _pathsQueue.removeLast();
-                  fileManagerStore.readDir(_pathsQueue.last);
+                if (fileManagerStore.pathsQueue.length > 1) {
+                  fileManagerStore.pathsQueue.removeLast();
+                  fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
                 }
               },
               child: const Icon(Icons.keyboard_arrow_left)),
@@ -61,29 +52,29 @@ class FileManagerPageState extends State<FileManagerPage> {
             height: 5,
           ),
           FloatingActionButton(
+              heroTag: 'parent',
               onPressed: (() {
-                _pathsQueue.add(dirname(_pathsQueue.last));
-                fileManagerStore.readDir(_pathsQueue.last);
+                fileManagerStore.pathsQueue
+                    .add(dirname(fileManagerStore.pathsQueue.last));
+                fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
               }),
               child: const Icon(Icons.keyboard_arrow_up)),
           const SizedBox(
             height: 5,
           ),
           FloatingActionButton(
+              heroTag: 'search',
               onPressed: () {
                 showDialog(
                     context: context,
-                    builder: (BuildContext context) {
-                      return SearchDialog(
-                        pathsQueue: _pathsQueue,
-                      );
-                    });
+                    builder: (context) => const SearchDialog());
               },
               child: const Icon(Icons.search)),
           const SizedBox(
             height: 5,
           ),
           FloatingActionButton(
+            heroTag: 'sort',
             onPressed: () {},
             child: PopupMenuButton(
                 tooltip: '',
@@ -139,40 +130,44 @@ class FileManagerPageState extends State<FileManagerPage> {
             height: 5,
           ),
           FloatingActionButton(
+              heroTag: 'refresh',
               onPressed: () {
-                fileManagerStore.readDir(_pathsQueue.last);
+                fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
               },
               child: const Icon(Icons.refresh))
         ]),
         appBar: AppBar(
-          title: const Text("Music tools Flutter"),
+          title: Observer(
+              builder: (context) => Text(fileManagerStore.pathsQueue.last)),
         ),
         body: Center(
             child: Observer(
                 builder: (_) => ListView.builder(
-                      itemCount: fileManagerStore.elements.length,
+                      itemCount: fileManagerStore.fileSystemEntities.length,
                       itemBuilder: (context, index) => SizedBox(
                         height: 60,
                         child: ListTile(
                           onTap: (() {
-                            if (fileManagerStore.elements.elementAt(index)
-                                is Directory) {
-                              _pathsQueue.add(fileManagerStore.elements
+                            if (fileManagerStore.fileSystemEntities
+                                .elementAt(index) is Directory) {
+                              fileManagerStore.pathsQueue.add(fileManagerStore
+                                  .fileSystemEntities
                                   .elementAt(index)
                                   .path);
-                              fileManagerStore.readDir(_pathsQueue.last);
+                              fileManagerStore
+                                  .readDir(fileManagerStore.pathsQueue.last);
                             } else {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => EditorPage(
-                                          fileManagerStore.elements
+                                          fileManagerStore.fileSystemEntities
                                               .elementAt(index)
                                               .path)));
                             }
                           }),
-                          leading: (fileManagerStore.elements.elementAt(index)
-                                  is Directory)
+                          leading: (fileManagerStore.fileSystemEntities
+                                  .elementAt(index) is Directory)
                               ? const Icon(
                                   Icons.folder,
                                   size: 30,
@@ -182,12 +177,12 @@ class FileManagerPageState extends State<FileManagerPage> {
                                   size: 30,
                                 ),
                           title: Text(
-                            basename(fileManagerStore.elements
+                            basename(fileManagerStore.fileSystemEntities
                                 .elementAt(index)
                                 .path),
                             overflow: TextOverflow.ellipsis,
                           ),
-                          subtitle: Text(fileManagerStore.elements
+                          subtitle: Text(fileManagerStore.fileSystemEntities
                               .elementAt(index)
                               .statSync()
                               .modified
@@ -201,10 +196,7 @@ class FileManagerPageState extends State<FileManagerPage> {
 }
 
 class SearchDialog extends StatefulWidget {
-  const SearchDialog({super.key, required List<String> pathsQueue})
-      : _pathsQueue = pathsQueue;
-
-  final List<String> _pathsQueue;
+  const SearchDialog({super.key});
 
   @override
   State<SearchDialog> createState() => _SearchDialogState();
@@ -228,9 +220,9 @@ class _SearchDialogState extends State<SearchDialog> {
                 controller: _searchController,
                 onChanged: (value) {
                   List<FileSystemEntity> filtedElements = [];
-                  for (final element in fileManagerStore.elements) {
-                    if (basename(element.path).contains(
-                        RegExp(value, caseSensitive: false))) {
+                  for (final element in fileManagerStore.fileSystemEntities) {
+                    if (basename(element.path)
+                        .contains(RegExp(value, caseSensitive: false))) {
                       filtedElements.add(element);
                     }
                   }
@@ -249,10 +241,12 @@ class _SearchDialogState extends State<SearchDialog> {
                               if (_filtedElements.elementAt(index)
                                   is Directory) {
                                 Navigator.pop(context);
-                                widget._pathsQueue
-                                    .add(_filtedElements.elementAt(index).path);
+                                setState(() {
+                                  fileManagerStore.pathsQueue.add(
+                                      _filtedElements.elementAt(index).path);
+                                });
                                 fileManagerStore
-                                    .readDir(widget._pathsQueue.last);
+                                    .readDir(fileManagerStore.pathsQueue.last);
                               } else {
                                 Navigator.push(
                                     context,
@@ -306,31 +300,36 @@ class FileTile extends StatelessWidget {
       height: 60,
       child: ListTile(
         onTap: (() {
-          if (fileManagerStore.elements.elementAt(_index) is Directory) {
-            _pathsQueue.add(fileManagerStore.elements.elementAt(_index).path);
+          if (fileManagerStore.fileSystemEntities.elementAt(_index)
+              is Directory) {
+            _pathsQueue.add(
+                fileManagerStore.fileSystemEntities.elementAt(_index).path);
             fileManagerStore.readDir(_pathsQueue.last);
           } else {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => EditorPage(
-                        fileManagerStore.elements.elementAt(_index).path)));
+                    builder: (context) => EditorPage(fileManagerStore
+                        .fileSystemEntities
+                        .elementAt(_index)
+                        .path)));
           }
         }),
-        leading: (fileManagerStore.elements.elementAt(_index) is Directory)
-            ? const Icon(
-                Icons.folder,
-                size: 30,
-              )
-            : const Icon(
-                Icons.audio_file,
-                size: 30,
-              ),
+        leading:
+            (fileManagerStore.fileSystemEntities.elementAt(_index) is Directory)
+                ? const Icon(
+                    Icons.folder,
+                    size: 30,
+                  )
+                : const Icon(
+                    Icons.audio_file,
+                    size: 30,
+                  ),
         title: Text(
-          basename(fileManagerStore.elements.elementAt(_index).path),
+          basename(fileManagerStore.fileSystemEntities.elementAt(_index).path),
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: Text(fileManagerStore.elements
+        subtitle: Text(fileManagerStore.fileSystemEntities
             .elementAt(_index)
             .statSync()
             .modified

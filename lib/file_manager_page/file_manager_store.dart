@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:path/path.dart';
+import 'package:path/path.dart'
+    as p; // 'Context' in 'path' duplicated 'ReactiveContext' in 'mobx'
 import 'package:mobx/mobx.dart';
 
 part 'file_manager_store.g.dart';
@@ -10,7 +11,13 @@ class FileManagerStore = FileManagerStoreBase with _$FileManagerStore;
 
 abstract class FileManagerStoreBase with Store {
   @observable
-  ObservableList<FileSystemEntity> elements = ObservableList();
+  ObservableList<String> pathsQueue = ObservableList();
+
+  @computed
+  String get currentPath => pathsQueue.isEmpty ? '' : pathsQueue.last;
+
+  @observable
+  ObservableList<FileSystemEntity> fileSystemEntities = ObservableList();
 
   @observable
   SortOrder sortOrder = SortOrder.byModifiedTime;
@@ -49,16 +56,16 @@ abstract class FileManagerStoreBase with Store {
   @action
   void readDir(String path) {
     Directory dir = Directory(path);
-    elements.clear();
+    fileSystemEntities.clear();
     dir.listSync().forEach((element) {
       if (element is Directory) {
-        elements.add(element);
+        fileSystemEntities.add(element);
       } else {
-        String format = extension(element.path);
+        String format = p.extension(element.path);
         if ((format.lastIndexOf(RegExp('mp3', caseSensitive: false)) != -1) |
             (format.lastIndexOf(RegExp('flac', caseSensitive: false)) != -1) |
             (format.lastIndexOf(RegExp('wav', caseSensitive: false)) != -1)) {
-          elements.add(element);
+          fileSystemEntities.add(element);
         }
       }
     });
@@ -85,7 +92,7 @@ abstract class FileManagerStoreBase with Store {
   void sortByName() {
     ObservableList<FileSystemEntity> dirs = ObservableList();
     ObservableList<FileSystemEntity> files = ObservableList();
-    for (var element in elements) {
+    for (var element in fileSystemEntities) {
       if (element is Directory) {
         dirs.add(element);
       } else {
@@ -94,23 +101,23 @@ abstract class FileManagerStoreBase with Store {
     }
     if (!descendingOrder) {
       dirs.sort((element1, element2) =>
-          basename(element1.path).compareTo(basename(element2.path)));
+          p.basename(element1.path).compareTo(p.basename(element2.path)));
       files.sort((element1, element2) =>
-          basename(element1.path).compareTo(basename(element2.path)));
+          p.basename(element1.path).compareTo(p.basename(element2.path)));
     } else {
       dirs.sort((element2, element1) =>
-          basename(element1.path).compareTo(basename(element2.path)));
+          p.basename(element1.path).compareTo(p.basename(element2.path)));
       files.sort((element2, element1) =>
-          basename(element1.path).compareTo(basename(element2.path)));
+          p.basename(element1.path).compareTo(p.basename(element2.path)));
     }
-    elements = dirs;
-    elements.addAll(files);
+    fileSystemEntities = dirs;
+    fileSystemEntities.addAll(files);
   }
 
   void sortByModifiedTime() {
     ObservableList<FileSystemEntity> dirs = ObservableList();
     ObservableList<FileSystemEntity> files = ObservableList();
-    for (var element in elements) {
+    for (var element in fileSystemEntities) {
       if (element is Directory) {
         dirs.add(element);
       } else {
@@ -128,8 +135,8 @@ abstract class FileManagerStoreBase with Store {
       files.sort((element2, element1) =>
           element1.statSync().modified.compareTo(element2.statSync().modified));
     }
-    elements = dirs;
-    elements.addAll(files);
+    fileSystemEntities = dirs;
+    fileSystemEntities.addAll(files);
   }
 }
 

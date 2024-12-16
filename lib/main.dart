@@ -1,8 +1,9 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:music_tools_flutter/file_manager_page/file_manager_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,40 +32,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Music tools Flutter',
-        theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
-        home: _isPermissionGranted
-            ? const FileManagerPage()
-            : Scaffold(
-                appBar: AppBar(
-                  title: const Text('获取文件访问权限'),
-                ),
-                body: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                            onPressed: () {
-                              if (Platform.isAndroid) {
-                                requestPermission(context);
-                              }
-                            },
-                            child: const Text(
-                              '点击获取本应用所需的权限',
-                              textAlign: TextAlign.center,
-                            )),
-                      ],
-                    ),
-                  ],
-                ),
-              ));
-  }
-
   void requestPermission(BuildContext context) {
     Permission.manageExternalStorage.onGrantedCallback(() {
       setState(() {
@@ -76,19 +43,19 @@ class _MyAppState extends State<MyApp> {
       });
     }).onPermanentlyDeniedCallback(() {
       requestPermissionManually(context).then((value) {
-        requestPermission(context);
+        if (context.mounted) requestPermission(context);
       });
     }).onRestrictedCallback(() {
       requestPermissionManually(context).then((value) {
-        requestPermission(context);
+        if (context.mounted) requestPermission(context);
       });
     }).onLimitedCallback(() {
       requestPermissionManually(context).then((value) {
-        requestPermission(context);
+        if (context.mounted) requestPermission(context);
       });
     }).onProvisionalCallback(() {
       requestPermissionManually(context).then((value) {
-        requestPermission(context);
+        if (context.mounted) requestPermission(context);
       });
     }).request();
   }
@@ -114,5 +81,60 @@ class _MyAppState extends State<MyApp> {
             ],
           );
         });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Music tools Flutter',
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
+      home: _isPermissionGranted
+          ? const PickPage()
+          : Center(
+              child: ElevatedButton(
+                  onPressed: () {
+                    if (Platform.isAndroid) {
+                      requestPermission(context);
+                    }
+                  },
+                  child: const Text(
+                    '点击获取本应用所需的权限',
+                    textAlign: TextAlign.center,
+                  )),
+            ),
+    );
+  }
+}
+
+class PickPage extends StatelessWidget {
+  const PickPage({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Music tools Flutter'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+            onPressed: () async {
+              final result = await FilePicker.platform.getDirectoryPath();
+
+              if (result != null) {
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FileManagerPage(result),
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('选择音频文件夹')),
+      ),
+    );
   }
 }

@@ -9,24 +9,48 @@ part of 'file_manager_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$FileManagerStore on FileManagerStoreBase, Store {
-  late final _$elementsAtom =
-      Atom(name: 'FileManagerStoreBase.elements');
+  Computed<String>? _$currentPathComputed;
 
   @override
-  ObservableList<FileSystemEntity> get elements {
-    _$elementsAtom.reportRead();
-    return super.elements;
+  String get currentPath =>
+      (_$currentPathComputed ??= Computed<String>(() => super.currentPath,
+              name: 'FileManagerStoreBase.currentPath'))
+          .value;
+
+  late final _$pathsQueueAtom =
+      Atom(name: 'FileManagerStoreBase.pathsQueue', context: context);
+
+  @override
+  ObservableList<String> get pathsQueue {
+    _$pathsQueueAtom.reportRead();
+    return super.pathsQueue;
   }
 
   @override
-  set elements(ObservableList<FileSystemEntity> value) {
-    _$elementsAtom.reportWrite(value, super.elements, () {
-      super.elements = value;
+  set pathsQueue(ObservableList<String> value) {
+    _$pathsQueueAtom.reportWrite(value, super.pathsQueue, () {
+      super.pathsQueue = value;
+    });
+  }
+
+  late final _$elementsAtom =
+      Atom(name: 'FileManagerStoreBase.elements', context: context);
+
+  @override
+  ObservableList<FileSystemEntity> get fileSystemEntities {
+    _$elementsAtom.reportRead();
+    return super.fileSystemEntities;
+  }
+
+  @override
+  set fileSystemEntities(ObservableList<FileSystemEntity> value) {
+    _$elementsAtom.reportWrite(value, super.fileSystemEntities, () {
+      super.fileSystemEntities = value;
     });
   }
 
   late final _$sortOrderAtom =
-      Atom(name: 'FileManagerStoreBase.sortOrder');
+      Atom(name: 'FileManagerStoreBase.sortOrder', context: context);
 
   @override
   SortOrder get sortOrder {
@@ -42,7 +66,7 @@ mixin _$FileManagerStore on FileManagerStoreBase, Store {
   }
 
   late final _$descendingOrderAtom =
-      Atom(name: 'FileManagerStoreBase.descendingOrder');
+      Atom(name: 'FileManagerStoreBase.descendingOrder', context: context);
 
   @override
   bool get descendingOrder {
@@ -58,7 +82,7 @@ mixin _$FileManagerStore on FileManagerStoreBase, Store {
   }
 
   late final _$FileManagerStoreBaseActionController =
-      ActionController(name: 'FileManagerStoreBase');
+      ActionController(name: 'FileManagerStoreBase', context: context);
 
   @override
   void setOrder(SortOrder order) {
@@ -96,9 +120,11 @@ mixin _$FileManagerStore on FileManagerStoreBase, Store {
   @override
   String toString() {
     return '''
-elements: ${elements},
+pathsQueue: ${pathsQueue},
+elements: ${fileSystemEntities},
 sortOrder: ${sortOrder},
-descendingOrder: ${descendingOrder}
+descendingOrder: ${descendingOrder},
+currentPath: ${currentPath}
     ''';
   }
 }
