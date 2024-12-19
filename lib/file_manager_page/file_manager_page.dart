@@ -27,171 +27,181 @@ class FileManagerPageState extends State<FileManagerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (b, d) {
-        if (fileManagerStore.pathsQueue.length > 1) {
-          fileManagerStore.pathsQueue.removeLast();
-          fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
-        } else {
-          exit(0);
-        }
-      },
-      child: Scaffold(
-        floatingActionButton: Column(mainAxisSize: MainAxisSize.min, children: [
-          FloatingActionButton(
-              heroTag: 'previous',
-              onPressed: () {
+    return Observer(
+        builder: (context) => PopScope(
+              canPop: !(fileManagerStore.pathsQueue.length > 1),
+              onPopInvokedWithResult: (_, __) {
                 if (fileManagerStore.pathsQueue.length > 1) {
                   fileManagerStore.pathsQueue.removeLast();
                   fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
                 }
               },
-              child: const Icon(Icons.keyboard_arrow_left)),
-          const SizedBox(
-            height: 5,
-          ),
-          FloatingActionButton(
-              heroTag: 'parent',
-              onPressed: (() {
-                fileManagerStore.pathsQueue
-                    .add(dirname(fileManagerStore.pathsQueue.last));
-                fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
-              }),
-              child: const Icon(Icons.keyboard_arrow_up)),
-          const SizedBox(
-            height: 5,
-          ),
-          FloatingActionButton(
-              heroTag: 'search',
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) => const SearchDialog());
-              },
-              child: const Icon(Icons.search)),
-          const SizedBox(
-            height: 5,
-          ),
-          FloatingActionButton(
-            heroTag: 'sort',
-            onPressed: () {},
-            child: PopupMenuButton(
-                tooltip: '',
-                icon: const Icon(Icons.sort),
-                splashRadius: 28,
-                itemBuilder: (BuildContext context) => [
-                      PopupMenuItem(
-                          padding: EdgeInsets.zero,
-                          child: Column(
-                            children: [
-                              Observer(builder: (context) {
-                                return CheckboxListTile(
-                                  title: const Text('降序'),
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  value: fileManagerStore.descendingOrder,
-                                  onChanged: (value) =>
-                                      fileManagerStore.reserve(),
-                                );
-                              }),
-                              const Divider(height: 1)
-                            ],
-                          )),
-                      PopupMenuItem(
-                          padding: EdgeInsets.zero,
-                          child: Observer(builder: (context) {
-                            return CheckboxListTile(
-                              title: const Text('按名称排序'),
-                              checkboxShape: const CircleBorder(),
-                              controlAffinity: ListTileControlAffinity.leading,
-                              value: fileManagerStore.sortOrder ==
-                                  SortOrder.byName,
-                              onChanged: (value) =>
-                                  fileManagerStore.setOrder(SortOrder.byName),
-                            );
-                          })),
-                      PopupMenuItem(
-                          padding: EdgeInsets.zero,
-                          child: Observer(builder: (context) {
-                            return CheckboxListTile(
-                              title: const Text('按修改时间排序'),
-                              checkboxShape: const CircleBorder(),
-                              controlAffinity: ListTileControlAffinity.leading,
-                              value: fileManagerStore.sortOrder ==
-                                  SortOrder.byModifiedTime,
-                              onChanged: (value) => fileManagerStore
-                                  .setOrder(SortOrder.byModifiedTime),
-                            );
-                          })),
-                    ]),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          FloatingActionButton(
-              heroTag: 'refresh',
-              onPressed: () {
-                fileManagerStore.readDir(fileManagerStore.pathsQueue.last);
-              },
-              child: const Icon(Icons.refresh))
-        ]),
-        appBar: AppBar(
-          title: Observer(
-              builder: (context) => Text(fileManagerStore.pathsQueue.last)),
-        ),
-        body: Center(
-            child: Observer(
-                builder: (_) => ListView.builder(
-                      itemCount: fileManagerStore.fileSystemEntities.length,
-                      itemBuilder: (context, index) => SizedBox(
-                        height: 60,
-                        child: ListTile(
-                          onTap: (() {
-                            if (fileManagerStore.fileSystemEntities
-                                .elementAt(index) is Directory) {
-                              fileManagerStore.pathsQueue.add(fileManagerStore
-                                  .fileSystemEntities
-                                  .elementAt(index)
-                                  .path);
-                              fileManagerStore
-                                  .readDir(fileManagerStore.pathsQueue.last);
-                            } else {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => EditorPage(
+              child: Scaffold(
+                floatingActionButton:
+                    Column(mainAxisSize: MainAxisSize.min, children: [
+                  FloatingActionButton(
+                      heroTag: 'previous',
+                      onPressed: () {
+                        if (fileManagerStore.pathsQueue.length > 1) {
+                          fileManagerStore.pathsQueue.removeLast();
+                          fileManagerStore
+                              .readDir(fileManagerStore.pathsQueue.last);
+                        }
+                      },
+                      child: const Icon(Icons.keyboard_arrow_left)),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  FloatingActionButton(
+                      heroTag: 'parent',
+                      onPressed: (() {
+                        fileManagerStore.pathsQueue
+                            .add(dirname(fileManagerStore.pathsQueue.last));
+                        fileManagerStore
+                            .readDir(fileManagerStore.pathsQueue.last);
+                      }),
+                      child: const Icon(Icons.keyboard_arrow_up)),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  FloatingActionButton(
+                      heroTag: 'search',
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) => const SearchDialog());
+                      },
+                      child: const Icon(Icons.search)),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  FloatingActionButton(
+                    heroTag: 'sort',
+                    onPressed: () {},
+                    child: PopupMenuButton(
+                        tooltip: '',
+                        icon: const Icon(Icons.sort),
+                        splashRadius: 28,
+                        itemBuilder: (BuildContext context) => [
+                              PopupMenuItem(
+                                  padding: EdgeInsets.zero,
+                                  child: Column(
+                                    children: [
+                                      Observer(builder: (context) {
+                                        return CheckboxListTile(
+                                          title: const Text('降序'),
+                                          controlAffinity:
+                                              ListTileControlAffinity.leading,
+                                          value:
+                                              fileManagerStore.descendingOrder,
+                                          onChanged: (value) =>
+                                              fileManagerStore.reserve(),
+                                        );
+                                      }),
+                                      const Divider(height: 1)
+                                    ],
+                                  )),
+                              PopupMenuItem(
+                                  padding: EdgeInsets.zero,
+                                  child: Observer(builder: (context) {
+                                    return CheckboxListTile(
+                                      title: const Text('按名称排序'),
+                                      checkboxShape: const CircleBorder(),
+                                      controlAffinity:
+                                          ListTileControlAffinity.leading,
+                                      value: fileManagerStore.sortOrder ==
+                                          SortOrder.byName,
+                                      onChanged: (value) => fileManagerStore
+                                          .setOrder(SortOrder.byName),
+                                    );
+                                  })),
+                              PopupMenuItem(
+                                  padding: EdgeInsets.zero,
+                                  child: Observer(builder: (context) {
+                                    return CheckboxListTile(
+                                      title: const Text('按修改时间排序'),
+                                      checkboxShape: const CircleBorder(),
+                                      controlAffinity:
+                                          ListTileControlAffinity.leading,
+                                      value: fileManagerStore.sortOrder ==
+                                          SortOrder.byModifiedTime,
+                                      onChanged: (value) => fileManagerStore
+                                          .setOrder(SortOrder.byModifiedTime),
+                                    );
+                                  })),
+                            ]),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  FloatingActionButton(
+                      heroTag: 'refresh',
+                      onPressed: () {
+                        fileManagerStore
+                            .readDir(fileManagerStore.pathsQueue.last);
+                      },
+                      child: const Icon(Icons.refresh))
+                ]),
+                appBar: AppBar(
+                  title: Observer(
+                      builder: (context) =>
+                          Text(fileManagerStore.pathsQueue.last)),
+                ),
+                body: Center(
+                    child: Observer(
+                        builder: (_) => ListView.builder(
+                              itemCount:
+                                  fileManagerStore.fileSystemEntities.length,
+                              itemBuilder: (context, index) => SizedBox(
+                                height: 60,
+                                child: ListTile(
+                                  onTap: (() {
+                                    if (fileManagerStore.fileSystemEntities
+                                        .elementAt(index) is Directory) {
+                                      fileManagerStore.pathsQueue.add(
                                           fileManagerStore.fileSystemEntities
                                               .elementAt(index)
-                                              .path)));
-                            }
-                          }),
-                          leading: (fileManagerStore.fileSystemEntities
-                                  .elementAt(index) is Directory)
-                              ? const Icon(
-                                  Icons.folder,
-                                  size: 30,
-                                )
-                              : const Icon(
-                                  Icons.audio_file,
-                                  size: 30,
+                                              .path);
+                                      fileManagerStore.readDir(
+                                          fileManagerStore.pathsQueue.last);
+                                    } else {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => EditorPage(
+                                                  fileManagerStore
+                                                      .fileSystemEntities
+                                                      .elementAt(index)
+                                                      .path)));
+                                    }
+                                  }),
+                                  leading: (fileManagerStore.fileSystemEntities
+                                          .elementAt(index) is Directory)
+                                      ? const Icon(
+                                          Icons.folder,
+                                          size: 30,
+                                        )
+                                      : const Icon(
+                                          Icons.audio_file,
+                                          size: 30,
+                                        ),
+                                  title: Text(
+                                    basename(fileManagerStore.fileSystemEntities
+                                        .elementAt(index)
+                                        .path),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text(fileManagerStore
+                                      .fileSystemEntities
+                                      .elementAt(index)
+                                      .statSync()
+                                      .modified
+                                      .toString()),
                                 ),
-                          title: Text(
-                            basename(fileManagerStore.fileSystemEntities
-                                .elementAt(index)
-                                .path),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Text(fileManagerStore.fileSystemEntities
-                              .elementAt(index)
-                              .statSync()
-                              .modified
-                              .toString()),
-                        ),
-                      ),
-                    ))),
-      ),
-    );
+                              ),
+                            ))),
+              ),
+            ));
   }
 }
 
