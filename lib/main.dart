@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:music_tools_flutter/file_manager_page/file_manager_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -85,23 +86,26 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Music tools Flutter',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
-      home: _isPermissionGranted
-          ? const PickPage()
-          : Center(
-              child: ElevatedButton(
-                  onPressed: () {
-                    if (Platform.isAndroid) {
-                      requestPermission(context);
-                    }
-                  },
-                  child: const Text(
-                    '点击获取本应用所需的权限',
-                    textAlign: TextAlign.center,
-                  )),
-            ),
+    return StyledToast(
+      locale: const Locale('zh', 'CN'),
+      child: MaterialApp(
+        title: 'Music tools Flutter',
+        theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
+        home: _isPermissionGranted
+            ? const PickPage()
+            : Center(
+                child: ElevatedButton(
+                    onPressed: () {
+                      if (Platform.isAndroid) {
+                        requestPermission(context);
+                      }
+                    },
+                    child: const Text(
+                      '点击获取本应用所需的权限',
+                      textAlign: TextAlign.center,
+                    )),
+              ),
+      ),
     );
   }
 }
