@@ -626,15 +626,19 @@ class FlacFile {
       if (_pictureBlock != null) {
         _pictureBlock!.setCover(cover);
       } else {
-        final flacMetaBlock = FlacMetaBlock(6, []);
+        final flacMetaBlock = FlacMetaBlock(6, List.filled(32, 0));
         _flacMetaBlocks.add(flacMetaBlock);
         _pictureBlock = PictureBlock(flacMetaBlock);
         _pictureBlock!.setCover(cover);
       }
     } else {
-      if (_pictureBlock != null) {
-        _pictureBlock!.setCover(cover);
+      for (var flacMetaBlock in _flacMetaBlocks) {
+        if (flacMetaBlock.type == 6) {
+          _flacMetaBlocks.remove(flacMetaBlock);
+          break;
+        }
       }
+      _pictureBlock = null;
     }
   }
 

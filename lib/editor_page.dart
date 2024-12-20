@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:music_tools_flutter/search_cover_page.dart';
 import 'package:music_tools_flutter/search_lyric_page.dart';
 import 'package:path/path.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:file_picker/file_picker.dart';
 
 import 'taglib/taglib.dart';
 
@@ -54,6 +58,45 @@ class EditorPageState extends State<EditorPage> {
       });
     });
     super.initState();
+  }
+
+  void downloadCover(BuildContext context) async {
+    Uint8List? data = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CoverSearchPage((_artistController
+                        .text.isNotEmpty &&
+                    _albumController.text.isNotEmpty &&
+                    _titleController.text.isNotEmpty)
+                ? '${_artistController.text} ${_albumController.text} ${_titleController.text}'
+                : basenameWithoutExtension(widget.path))));
+    if (data != null) {
+      setState(() {
+        _cover = data;
+      });
+    }
+  }
+
+  void importCover(BuildContext context) async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null) {
+      final file = File(result.files.first.path!);
+      setState(() {
+        _cover = file.readAsBytesSync();
+      });
+    }
+  }
+
+  void exportCover(BuildContext context) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      await FilePicker.platform.saveFile(type: FileType.image, bytes: _cover!);
+    } else {
+      final result = await FilePicker.platform.getDirectoryPath();
+      if (result != null) {
+        final file = File(result);
+        file.writeAsBytesSync(_cover!);
+      }
+    }
   }
 
   final TextEditingController _titleController = TextEditingController();
@@ -127,26 +170,7 @@ class EditorPageState extends State<EditorPage> {
                           SizedBox(
                             height: 40,
                             child: MaterialButton(
-                              onPressed: () async {
-                                Uint8List? data = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => CoverSearchPage(
-                                            (_artistController
-                                                        .text.isNotEmpty &&
-                                                    _albumController
-                                                        .text.isNotEmpty &&
-                                                    _titleController
-                                                        .text.isNotEmpty)
-                                                ? '${_artistController.text} ${_albumController.text} ${_titleController.text}'
-                                                : basenameWithoutExtension(
-                                                    widget.path))));
-                                if (data != null) {
-                                  setState(() {
-                                    _cover = data;
-                                  });
-                                }
-                              },
+                              onPressed: () => downloadCover(context),
                               color: Colors.blue,
                               child: const Text(
                                 '下载封面',
@@ -157,7 +181,7 @@ class EditorPageState extends State<EditorPage> {
                           SizedBox(
                             height: 40,
                             child: MaterialButton(
-                              onPressed: () {},
+                              onPressed: () => importCover(context),
                               color: Colors.blue,
                               child: const Text(
                                 '导入封面',
@@ -165,30 +189,34 @@ class EditorPageState extends State<EditorPage> {
                               ),
                             ),
                           ),
-                          SizedBox(
-                            height: 40,
-                            child: MaterialButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _cover = Uint8List(0);
-                                  });
-                                },
-                                color: Colors.blue,
-                                child: const Text(
-                                  '移除封面',
-                                  style: TextStyle(color: Colors.white),
-                                )),
-                          ),
-                          SizedBox(
-                            height: 40,
-                            child: MaterialButton(
-                                onPressed: () {},
-                                color: Colors.blue,
-                                child: const Text(
-                                  '导出封面',
-                                  style: TextStyle(color: Colors.white),
-                                )),
-                          ),
+                          (_cover != null)
+                              ? SizedBox(
+                                  height: 40,
+                                  child: MaterialButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _cover = null;
+                                        });
+                                      },
+                                      color: Colors.blue,
+                                      child: const Text(
+                                        '移除封面',
+                                        style: TextStyle(color: Colors.white),
+                                      )),
+                                )
+                              : Container(),
+                          (_cover != null)
+                              ? SizedBox(
+                                  height: 40,
+                                  child: MaterialButton(
+                                      onPressed: () => exportCover(context),
+                                      color: Colors.blue,
+                                      child: const Text(
+                                        '导出封面',
+                                        style: TextStyle(color: Colors.white),
+                                      )),
+                                )
+                              : Container(),
                         ],
                       ),
                     )
