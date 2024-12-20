@@ -143,10 +143,17 @@ class FileManagerPageState extends State<FileManagerPage> {
                       child: const Icon(Icons.refresh))
                 ]),
                 appBar: AppBar(
-                  title: Observer(
-                      builder: (context) =>
-                          Text(fileManagerStore.pathsQueue.last)),
-                ),
+                    // TODO: 目前能让文本把左边显示成省略号，但是右边直接被截断了，不知道怎么修
+                    title: Observer(
+                  builder: (context) => Text(
+                    fileManagerStore.pathsQueue.last,
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    softWrap: false,
+                  ),
+                )),
                 body: Center(
                     child: Observer(
                         builder: (_) => ListView.builder(
