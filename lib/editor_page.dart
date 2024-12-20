@@ -107,8 +107,12 @@ class EditorPageState extends State<EditorPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => CoverSearchPage(
-                                          _titleController.text.isNotEmpty
-                                              ? _titleController.text
+                                          (_artistController.text.isNotEmpty &&
+                                                  _albumController
+                                                      .text.isNotEmpty &&
+                                                  _titleController
+                                                      .text.isNotEmpty)
+                                              ? '${_artistController.text} ${_albumController.text} ${_titleController.text}'
                                               : basenameWithoutExtension(
                                                   widget.path))));
                               if (data != null) {
@@ -264,8 +268,10 @@ class EditorPageState extends State<EditorPage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => LyricSearchPage(
-                                  _titleController.text.isNotEmpty
-                                      ? _titleController.text
+                                  (_artistController.text.isNotEmpty &&
+                                          _albumController.text.isNotEmpty &&
+                                          _titleController.text.isNotEmpty)
+                                      ? '${_artistController.text} ${_albumController.text} ${_titleController.text}'
                                       : basenameWithoutExtension(
                                           widget.path))));
                       if (data != null) {
