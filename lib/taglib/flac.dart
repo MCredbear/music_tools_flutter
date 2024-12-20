@@ -277,7 +277,7 @@ class VorbisCommentBlock {
     }
     if (comment != null) {
       _comments
-          .add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(comment)));
+          .add(VorbisComment('DESCRIPTION'.codeUnits, utf8.encode(comment)));
     }
   }
 
@@ -297,7 +297,7 @@ class VorbisCommentBlock {
       }
     }
     if (track != null) {
-      _comments.add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(track)));
+      _comments.add(VorbisComment('TRACKNUMBER'.codeUnits, utf8.encode(track)));
     }
   }
 
@@ -331,7 +331,7 @@ class VorbisCommentBlock {
       }
     }
     if (year != null) {
-      _comments.add(VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(year)));
+      _comments.add(VorbisComment('DATE'.codeUnits, utf8.encode(year)));
     }
   }
 

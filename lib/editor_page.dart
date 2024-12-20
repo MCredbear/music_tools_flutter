@@ -8,26 +8,17 @@ import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'taglib/taglib.dart';
 
 void saveAudioFile(Map<String, dynamic> params) {
-  final audioFile = params['audioFile'];
-  final title = params['title'];
-  final album = params['album'];
-  final artist = params['artist'];
-  final albumArtist = params['albumArtist'];
-  final cd = params['cd'];
-  final track = params['track'];
-  final lyric = params['lyric'];
-  final comment = params['comment'];
-  final cover = params['cover'];
-
-  audioFile.setTitle(title);
-  audioFile.setAlbum(album);
-  audioFile.setArtist(artist);
-  audioFile.setAlbumArtist(albumArtist);
-  audioFile.setCD(cd);
-  audioFile.setTrack(track);
-  audioFile.setLyric(lyric);
-  audioFile.setComment(comment);
-  audioFile.setCover(cover);
+  final audioFile = params['audioFile'] as AudioFile;
+  audioFile.setTitle(params['title']);
+  audioFile.setAlbum(params['album']);
+  audioFile.setArtist(params['artist']);
+  audioFile.setAlbumArtist(params['albumArtist']);
+  audioFile.setCD(params['cd']);
+  audioFile.setTrack(params['track']);
+  audioFile.setYear(params['year']);
+  audioFile.setLyric(params['lyric']);
+  audioFile.setComment(params['comment']);
+  audioFile.setCover(params['cover']);
   audioFile.save();
 }
 
@@ -364,6 +355,7 @@ class EditorPageState extends State<EditorPage> {
           : null,
       'cd': _cdController.text.isNotEmpty ? _cdController.text : null,
       'track': _trackController.text.isNotEmpty ? _trackController.text : null,
+      'year': _yearController.text.isNotEmpty ? _yearController.text : null,
       'lyric': _lyricController.text.isNotEmpty ? _lyricController.text : null,
       'comment':
           _commentController.text.isNotEmpty ? _commentController.text : null,
