@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:music_tools_flutter/search_cover_page.dart';
 import 'package:music_tools_flutter/search_lyric_page.dart';
 import 'package:path/path.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
 import 'taglib/taglib.dart';
 
@@ -371,5 +372,6 @@ class EditorPageState extends State<EditorPage> {
     setState(() {
       saving = false;
     });
+    showToast('保存成功');
   }
 }

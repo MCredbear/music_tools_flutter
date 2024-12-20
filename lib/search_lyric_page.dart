@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
 class LyricSearchPage extends StatefulWidget {
   const LyricSearchPage(this.keyword, {super.key});
@@ -96,7 +97,7 @@ class _LyricSearchPageState extends State<LyricSearchPage> {
           setState(() {
             _isLoading = false;
           });
-          // Fluttertoast.showToast(msg: '获取失败，请检查您的网络');
+          showToast('获取失败，请检查您的网络');
         }
       }
       setState(() {
@@ -107,7 +108,7 @@ class _LyricSearchPageState extends State<LyricSearchPage> {
       setState(() {
         _isLoading = false;
       });
-      // Fluttertoast.showToast(msg: '获取失败，请检查您的网络');
+      showToast('获取失败，请检查您的网络');
     }
   }
 

@@ -18,6 +18,7 @@ dependencies:
   transparent_image: ^2.0.0
   permission_handler: ^11.1.0
   file_picker: 8.1.4
+  flutter_styled_toast: ^2.2.1
 
 
 dev_dependencies:
