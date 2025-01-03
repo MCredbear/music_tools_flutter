@@ -1,9 +1,10 @@
 import 'dart:io';
+import 'package:cross_file/cross_file.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 
-import '../editor_page.dart';
+import '../editor_page/editor_page.dart';
 
 import 'file_manager_store.dart';
 
@@ -176,10 +177,10 @@ class FileManagerPageState extends State<FileManagerPage> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) => EditorPage(
-                                                  fileManagerStore
+                                                  XFile(fileManagerStore
                                                       .fileSystemEntities
                                                       .elementAt(index)
-                                                      .path)));
+                                                      .path))));
                                     }
                                   }),
                                   leading: (fileManagerStore.fileSystemEntities
@@ -268,10 +269,10 @@ class _SearchDialogState extends State<SearchDialog> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => EditorPage(
+                                        builder: (context) => EditorPage(XFile(
                                             _filtedElements
                                                 .elementAt(index)
-                                                .path)));
+                                                .path))));
                               }
                             }),
                             leading:
@@ -326,10 +327,10 @@ class FileTile extends StatelessWidget {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => EditorPage(fileManagerStore
+                    builder: (context) => EditorPage(XFile(fileManagerStore
                         .fileSystemEntities
                         .elementAt(_index)
-                        .path)));
+                        .path))));
           }
         }),
         leading:

@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:music_tools_flutter/editor_page/editor_page.dart';
 import 'package:music_tools_flutter/file_manager_page/file_manager_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -24,13 +26,17 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    Permission.manageExternalStorage.status.then((value) {
-      if (value == PermissionStatus.granted) {
-        setState(() {
-          _isPermissionGranted = true;
+    if (!kIsWeb) {
+      if (Platform.isAndroid) {
+        Permission.manageExternalStorage.status.then((value) {
+          if (value == PermissionStatus.granted) {
+            setState(() {
+              _isPermissionGranted = true;
+            });
+          }
         });
       }
-    });
+    }
   }
 
   void requestPermission(BuildContext context) {
@@ -91,20 +97,24 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         title: 'Music tools Flutter',
         theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
-        home: _isPermissionGranted
-            ? const PickPage()
-            : Center(
-                child: ElevatedButton(
-                    onPressed: () {
-                      if (Platform.isAndroid) {
-                        requestPermission(context);
-                      }
-                    },
-                    child: const Text(
-                      '点击获取本应用所需的权限',
-                      textAlign: TextAlign.center,
-                    )),
-              ),
+        home: switch (kIsWeb) {
+          true => const PickPage(),
+          false => switch (Platform.isAndroid) {
+              true => _isPermissionGranted
+                  ? const PickPage()
+                  : Center(
+                      child: ElevatedButton(
+                          onPressed: () {
+                            requestPermission(context);
+                          },
+                          child: const Text(
+                            '点击获取本应用所需的权限',
+                            textAlign: TextAlign.center,
+                          )),
+                    ),
+              false => const PickPage(),
+            },
+        },
       ),
     );
   }
@@ -124,20 +134,37 @@ class PickPage extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
             onPressed: () async {
-              final result = await FilePicker.platform.getDirectoryPath();
+              if (kIsWeb) {
+                final result =
+                    await FilePicker.platform.pickFiles(type: FileType.audio);
 
-              if (result != null) {
-                if (context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FileManagerPage(result),
-                    ),
-                  );
+                if (result != null) {
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EditorPage(result.files.first.xFile),
+                      ),
+                    );
+                  }
+                }
+              } else {
+                final result = await FilePicker.platform.getDirectoryPath();
+
+                if (result != null) {
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FileManagerPage(result),
+                      ),
+                    );
+                  }
                 }
               }
             },
-            child: const Text('选择音频文件夹')),
+            child: const Text(kIsWeb ? '选择音频文件' : '选择音频文件夹')),
       ),
     );
   }

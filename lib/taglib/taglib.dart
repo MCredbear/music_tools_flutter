@@ -3,9 +3,7 @@
 library taglib;
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart';
 
 part 'mp3.dart';
 part 'flac.dart';
@@ -13,268 +11,232 @@ part 'flac.dart';
 enum Format { unknow, mp3, flac }
 
 class AudioFile {
-  AudioFile(this._path) {
-    if (extension(_path).lastIndexOf(RegExp('mp3', caseSensitive: false)) !=
-        -1) {
-      _format = Format.mp3;
-      _mp3file = Mp3File(this);
-    } else if (extension(_path)
-            .lastIndexOf(RegExp('flac', caseSensitive: false)) !=
-        -1) {
-      _format = Format.flac;
-      _flacFile = FlacFile(this);
+  AudioFile(Uint8List rawData) : _rawData = rawData {
+    // guess format from first bytes of rawData
+    if (_rawData.length > 4) {
+      if (_rawData[0] == 0x49 && _rawData[1] == 0x44 && _rawData[2] == 0x33) {
+        _format = Format.mp3;
+        _mp3file = Mp3File(this);
+      } else if (_rawData[0] == 0x66 &&
+          _rawData[1] == 0x4C &&
+          _rawData[2] == 0x61 &&
+          _rawData[3] == 0x43) {
+        _format = Format.flac;
+        _flacFile = FlacFile(this);
+      } else
+        _format = Format.unknow;
     } else
       _format = Format.unknow;
-  }
 
-  Future<bool> read() async {
     switch (_format) {
       case Format.mp3:
-        return await _mp3file!.read();
+        _mp3file = Mp3File(this);
+        break;
       case Format.flac:
-        return await _flacFile!.read();
+        _flacFile = FlacFile(this);
+        break;
       default:
-        return false;
+        break;
     }
   }
 
-  Future<bool> save() async {
+  List<int> save() {
     switch (_format) {
       case Format.mp3:
-        return await _mp3file!.save();
+        _mp3file!.save();
+        break;
       case Format.flac:
-        return await _flacFile!.save();
+        _flacFile!.save();
+        break;
       default:
-        return false;
+        break;
     }
+
+    return _rawData;
   }
+
+  Format get format => _format;
 
   String? getTitle() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getTitle();
-      case Format.flac:
-        return _flacFile!.getTitle();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getTitle(),
+      Format.flac => _flacFile!.getTitle(),
+      _ => null
+    };
   }
 
   String? getArtist() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getArtist();
-      case Format.flac:
-        return _flacFile!.getArtist();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getArtist(),
+      Format.flac => _flacFile!.getArtist(),
+      _ => null
+    };
   }
 
   String? getAlbum() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getAlbum();
-      case Format.flac:
-        return _flacFile!.getAlbum();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getAlbum(),
+      Format.flac => _flacFile!.getAlbum(),
+      _ => null
+    };
   }
 
   String? getAlbumArtist() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getAlbumArtist();
-      case Format.flac:
-        return _flacFile!.getAlbumArtist();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getAlbumArtist(),
+      Format.flac => _flacFile!.getAlbumArtist(),
+      _ => null
+    };
   }
 
   String? getLyric() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getLyric();
-      case Format.flac:
-        return _flacFile!.getLyric();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getLyric(),
+      Format.flac => _flacFile!.getLyric(),
+      _ => null
+    };
   }
 
   String? getComment() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getComment();
-      case Format.flac:
-        return _flacFile!.getComment();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getComment(),
+      Format.flac => _flacFile!.getComment(),
+      _ => null
+    };
   }
 
   Uint8List? getCover() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getCover();
-      case Format.flac:
-        return _flacFile!.getCover();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getCover(),
+      Format.flac => _flacFile!.getCover(),
+      _ => null
+    };
   }
 
   String? getTrack() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getTrack();
-      case Format.flac:
-        return _flacFile!.getTrack();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getTrack(),
+      Format.flac => _flacFile!.getTrack(),
+      _ => null
+    };
   }
 
   String? getCD() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getCD();
-      case Format.flac:
-        return _flacFile!.getCD();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getCD(),
+      Format.flac => _flacFile!.getCD(),
+      _ => null
+    };
   }
 
   String? getYear() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getYear();
-      case Format.flac:
-        return _flacFile!.getYear();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getYear(),
+      Format.flac => _flacFile!.getYear(),
+      _ => null
+    };
   }
 
   String? getEncoder() {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.getEncoder();
-      case Format.flac:
-        return _flacFile!.getEncoder();
-      default:
-        return null;
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.getEncoder(),
+      Format.flac => _flacFile!.getEncoder(),
+      _ => null
+    };
   }
 
   void setTitle(String? title) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setTitle(title);
-      case Format.flac:
-        return _flacFile!.setTitle(title);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setTitle(title),
+      Format.flac => _flacFile!.setTitle(title),
+      _ => null
+    };
   }
 
   void setArtist(String? artist) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setArtist(artist);
-      case Format.flac:
-        return _flacFile!.setArtist(artist);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setArtist(artist),
+      Format.flac => _flacFile!.setArtist(artist),
+      _ => null
+    };
   }
 
   void setAlbum(String? album) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setAlbum(album);
-      case Format.flac:
-        return _flacFile!.setAlbum(album);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setAlbum(album),
+      Format.flac => _flacFile!.setAlbum(album),
+      _ => null
+    };
   }
 
   void setAlbumArtist(String? albumArtist) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setAlbumArtist(albumArtist);
-      case Format.flac:
-        return _flacFile!.setAlbumArtist(albumArtist);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setAlbumArtist(albumArtist),
+      Format.flac => _flacFile!.setAlbumArtist(albumArtist),
+      _ => null
+    };
   }
 
   void setLyric(String? lyric) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setLyric(lyric);
-      case Format.flac:
-        return _flacFile!.setLyric(lyric);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setLyric(lyric),
+      Format.flac => _flacFile!.setLyric(lyric),
+      _ => null
+    };
   }
 
   void setComment(String? comment) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setComment(comment);
-      case Format.flac:
-        return _flacFile!.setComment(comment);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setComment(comment),
+      Format.flac => _flacFile!.setComment(comment),
+      _ => null
+    };
   }
 
   void setCover(Uint8List? cover) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setCover(cover);
-      case Format.flac:
-        return _flacFile!.setCover(cover);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setCover(cover),
+      Format.flac => _flacFile!.setCover(cover),
+      _ => null
+    };
   }
 
   void setTrack(String? track) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setTrack(track);
-      case Format.flac:
-        return _flacFile!.setTrack(track);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setTrack(track),
+      Format.flac => _flacFile!.setTrack(track),
+      _ => null
+    };
   }
 
   void setCD(String? cd) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setCD(cd);
-      case Format.flac:
-        return _flacFile!.setCD(cd);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setCD(cd),
+      Format.flac => _flacFile!.setCD(cd),
+      _ => null
+    };
   }
 
   void setYear(String? year) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setYear(year);
-      case Format.flac:
-        return _flacFile!.setYear(year);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setYear(year),
+      Format.flac => _flacFile!.setYear(year),
+      _ => null
+    };
   }
 
   void setEncoder(String? encoder) {
-    switch (_format) {
-      case Format.mp3:
-        return _mp3file!.setEncoder(encoder);
-      case Format.flac:
-        return _flacFile!.setEncoder(encoder);
-    }
+    return switch (_format) {
+      Format.mp3 => _mp3file!.setEncoder(encoder),
+      Format.flac => _flacFile!.setEncoder(encoder),
+      _ => null
+    };
   }
 
-  final String _path;
+  late Format _format;
 
-  late Enum _format;
+  List<int> _rawData = [];
 
   Mp3File? _mp3file;
   FlacFile? _flacFile;
-
-  Uint8List? cover;
 }

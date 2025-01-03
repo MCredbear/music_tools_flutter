@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,28 +7,15 @@ import 'package:music_tools_flutter/search_lyric_page.dart';
 import 'package:path/path.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:cross_file/cross_file.dart';
 
-import 'taglib/taglib.dart';
-
-void saveAudioFile(Map<String, dynamic> params) {
-  final audioFile = params['audioFile'] as AudioFile;
-  audioFile.setTitle(params['title']);
-  audioFile.setAlbum(params['album']);
-  audioFile.setArtist(params['artist']);
-  audioFile.setAlbumArtist(params['albumArtist']);
-  audioFile.setCD(params['cd']);
-  audioFile.setTrack(params['track']);
-  audioFile.setYear(params['year']);
-  audioFile.setLyric(params['lyric']);
-  audioFile.setComment(params['comment']);
-  audioFile.setCover(params['cover']);
-  audioFile.save();
-}
+import 'package:music_tools_flutter/taglib/taglib.dart';
+import 'save_file_web.dart' if (dart.library.html) 'save_file_non_web.dart';
 
 class EditorPage extends StatefulWidget {
-  const EditorPage(this.path, {super.key});
+  const EditorPage(this.xFile, {super.key});
 
-  final String path;
+  final XFile xFile;
 
   @override
   State<EditorPage> createState() => EditorPageState();
@@ -42,8 +28,10 @@ class EditorPageState extends State<EditorPage> {
 
   @override
   void initState() {
-    _audioFile = AudioFile(widget.path);
-    _audioFile.read().then((value) {
+    super.initState();
+
+    widget.xFile.readAsBytes().then((bytes) {
+      _audioFile = AudioFile(bytes);
       setState(() {
         _titleController.text = _audioFile.getTitle() ?? '';
         _artistController.text = _audioFile.getArtist() ?? '';
@@ -57,7 +45,6 @@ class EditorPageState extends State<EditorPage> {
         _cover = _audioFile.getCover();
       });
     });
-    super.initState();
   }
 
   void downloadCover(BuildContext context) async {
@@ -69,7 +56,7 @@ class EditorPageState extends State<EditorPage> {
                     _albumController.text.isNotEmpty &&
                     _titleController.text.isNotEmpty)
                 ? '${_artistController.text} ${_albumController.text} ${_titleController.text}'
-                : basenameWithoutExtension(widget.path))));
+                : basenameWithoutExtension(widget.xFile.name))));
     if (data != null) {
       setState(() {
         _cover = data;
@@ -117,7 +104,7 @@ class EditorPageState extends State<EditorPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            basename(widget.path),
+            widget.xFile.name,
             maxLines: 2,
             textScaler: const TextScaler.linear(0.8),
           ),
@@ -329,7 +316,7 @@ class EditorPageState extends State<EditorPage> {
                                             _titleController.text.isNotEmpty)
                                         ? '${_artistController.text} ${_albumController.text} ${_titleController.text}'
                                         : basenameWithoutExtension(
-                                            widget.path))));
+                                            widget.xFile.name))));
                         if (data != null) {
                           setState(() {
                             _lyricController.text = data;
@@ -374,6 +361,7 @@ class EditorPageState extends State<EditorPage> {
     });
     await compute(saveAudioFile, {
       'audioFile': _audioFile,
+      'xFile': widget.xFile,
       'title': _titleController.text.isNotEmpty ? _titleController.text : null,
       'album': _albumController.text.isNotEmpty ? _albumController.text : null,
       'artist':

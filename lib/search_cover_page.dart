@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
@@ -41,18 +41,9 @@ class _CoverSearchPageState extends State<CoverSearchPage> {
 
   Future<void> search(String keyword, int offset) async {
     try {
-      final httpClient = HttpClient();
-      final httpRequest = await httpClient.get('music.163.com', 80,
-          '/api/cloudsearch/pc?s=${Uri.encodeFull(keyword.substring(1))}&type=1&limit=10&offset=$offset&total=true');
-      final response = await httpRequest.close();
-      httpClient.close();
-      final dataStream = response.transform(utf8.decoder);
-      var jsonData = '';
-      await for (final data in dataStream) {
-        jsonData += data;
-      }
-      httpClient.close();
-      final json = jsonDecode(jsonData);
+      final response = await http.get(Uri.parse(
+          'https://music.redbear.moe/api/cloudsearch/pc?s=${Uri.encodeFull(keyword.substring(1))}&type=1&limit=10&offset=$offset&total=true'));
+      final json = jsonDecode(response.body);
       final int songCount = json['result']['songCount'];
       if (songCount == 0) {
         setState(() {
@@ -197,14 +188,8 @@ class ImageCard extends StatelessWidget {
         child: InkWell(
           onTap: () async {
             try {
-              var httpClient = HttpClient();
-              var httpRequest = await httpClient.getUrl(Uri.parse(imageUrl));
-              var response = await httpRequest.close();
-              httpClient.close();
-              List<int> data = [];
-              await for (var data_ in response) {
-                data.addAll(data_);
-              }
+              final response = await http.get(Uri.parse(imageUrl));
+              final data = response.bodyBytes;
               if (!context.mounted) return;
               Navigator.pop(context, Uint8List.fromList(data));
             } catch (e) {

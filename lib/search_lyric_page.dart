@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
@@ -40,18 +40,9 @@ class _LyricSearchPageState extends State<LyricSearchPage> {
 
   Future<void> search(String keyword, int offset) async {
     try {
-      final httpClient = HttpClient();
-      final httpRequest = await httpClient.get('music.163.com', 80,
-          '/api/cloudsearch/pc?s=${Uri.encodeFull(keyword.substring(1))}&type=1&limit=10&offset=$offset&total=true');
-      final response = await httpRequest.close();
-      httpClient.close();
-      final dataStream = response.transform(utf8.decoder);
-      var jsonString = '';
-      await for (final data in dataStream) {
-        jsonString += data;
-      }
-      httpClient.close();
-      final json = jsonDecode(jsonString);
+      final response = await http.get(Uri.parse(
+          'https://music.redbear.moe/api/cloudsearch/pc?s=${Uri.encodeFull(keyword.substring(1))}&type=1&limit=10&offset=$offset&total=true'));
+      final json = jsonDecode(response.body);
       final songCount = json['result']['songCount'];
       if (songCount == 0) {
         setState(() {
@@ -72,18 +63,9 @@ class _LyricSearchPageState extends State<LyricSearchPage> {
         final String artist = song['ar'][0]['name'];
         final String album = song['al']['name'];
         try {
-          final httpClient = HttpClient();
-          final httpRequest = await httpClient.get('music.163.com', 80,
-              'api/song/lyric?_nmclfl=1&id=$id&tv=-1&lv=-1&rv=-1&kv=-1');
-          final response = await httpRequest.close();
-          httpClient.close();
-          final dataStream = response.transform(utf8.decoder);
-          var jsonString = '';
-          await for (final data in dataStream) {
-            jsonString += data;
-          }
-          httpClient.close();
-          final json = jsonDecode(jsonString);
+          final response = await http.get(Uri.parse(
+              'https://music.redbear.moe/api/song/lyric?_nmclfl=1&id=$id&tv=-1&lv=-1&rv=-1&kv=-1'));
+          final json = jsonDecode(response.body);
           final bool? isPureMusic = json['pureMusic'];
           if (isPureMusic != true) {
             final String originalLyric = json['lrc']?['lyric'] ?? '';

@@ -19,6 +19,8 @@ dependencies:
   permission_handler: ^11.1.0
   file_picker: 8.1.4
   flutter_styled_toast: ^2.2.1
+  cross_file: ^0.3.4+2
+  http: ^1.2.2
 
 
 dev_dependencies:

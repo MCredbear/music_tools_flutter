@@ -408,33 +408,21 @@ class PictureBlock {
 }
 
 class FlacFile {
-  FlacFile(this._audioFile);
-
-  final AudioFile _audioFile;
-
-  final List<FlacMetaBlock> _flacMetaBlocks = [];
-
-  VorbisCommentBlock? _vorbisCommentBlock;
-  PictureBlock? _pictureBlock;
-
-  Future<bool> read() async {
-    File file = File(_audioFile._path);
-    var randomAccessFile = file.openSync();
-    List<int> sign = randomAccessFile.readSync(4);
-    if (sign.length != 4) return false;
-    if ((sign[0] != 'f'.codeUnitAt(0)) |
-        (sign[1] != 'L'.codeUnitAt(0)) |
-        (sign[2] != 'a'.codeUnitAt(0)) |
-        (sign[3] != 'C'.codeUnitAt(0))) return false;
+  FlacFile(this._audioFile) {
     var isLast = false;
+    var index = 4;
     while (!isLast) {
-      var metaBlockHeader = randomAccessFile.readSync(1);
+      var metaBlockHeader = _audioFile._rawData.sublist(index, index + 1);
+      index += 1;
       var header = metaBlockHeader[0];
       isLast = ((header & 0x80) >> 7) == 1;
       var type = header & 0x7F;
-      var sizes = randomAccessFile.readSync(3);
+      var sizes = _audioFile._rawData.sublist(index, index + 3);
+      index += 3;
       var dataLength = (sizes[0] << 16) + (sizes[1] << 8) + sizes[2];
-      var metadataBytes = randomAccessFile.readSync(dataLength);
+      var metadataBytes =
+          _audioFile._rawData.sublist(index, index + dataLength);
+      index += dataLength;
       _flacMetaBlocks.add(FlacMetaBlock(type, metadataBytes));
       if (type == 4) {
         _vorbisCommentBlock = VorbisCommentBlock(_flacMetaBlocks.last);
@@ -443,20 +431,17 @@ class FlacFile {
         _pictureBlock = PictureBlock(_flacMetaBlocks.last);
       }
     }
-    randomAccessFile.closeSync();
-    return true;
   }
 
-  Future<bool> save() async {
-    File file = File(_audioFile._path);
-    DateTime fileTime = file.lastModifiedSync();
-    List<int> totalData = file.readAsBytesSync();
-    List<int> sign = totalData.sublist(0, 4);
-    if (sign.length != 4) return false;
-    if ((sign[0] != 'f'.codeUnitAt(0)) |
-        (sign[1] != 'L'.codeUnitAt(0)) |
-        (sign[2] != 'a'.codeUnitAt(0)) |
-        (sign[3] != 'C'.codeUnitAt(0))) return false;
+  final AudioFile _audioFile;
+
+  final List<FlacMetaBlock> _flacMetaBlocks = [];
+
+  VorbisCommentBlock? _vorbisCommentBlock;
+  PictureBlock? _pictureBlock;
+
+  void save() {
+    var totalData = _audioFile._rawData;
     var isLast = false;
     int index = 4;
     while (!isLast) {
@@ -488,9 +473,7 @@ class FlacFile {
       flacMetaBlocksData += header + flacMetaBlock.data;
     }
     totalData = 'fLaC'.codeUnits + flacMetaBlocksData + totalData;
-    file.writeAsBytesSync(totalData);
-    file.setLastModifiedSync(fileTime);
-    return true;
+    _audioFile._rawData = totalData;
   }
 
   String? getTitle() => _vorbisCommentBlock?.getTitle();

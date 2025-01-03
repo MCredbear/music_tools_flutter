@@ -16,59 +16,46 @@ class ID3Frame {
 }
 
 class Mp3File {
-  Mp3File(this._audioFile);
+  Mp3File(this._audioFile) {
+    List<int> head = _audioFile._rawData.sublist(0, 10);
+
+    int version = head[3];
+    int tagSize = 0;
+
+    tagSize += head[6] * 0x200000;
+    tagSize += head[7] * 0x4000;
+    tagSize += head[8] * 0x80;
+    tagSize += head[9];
+
+    if (tagSize != 0) {
+      List<int> tagData = _audioFile._rawData.sublist(10, 10 + tagSize);
+      int i = 0;
+      while (i < tagData.length - 10) {
+        if (tagData[i] == 0) break;
+        int frameSize = 0;
+        if (version == 3) {
+          frameSize += tagData[i + 4] * 0x1000000;
+          frameSize += tagData[i + 4 + 1] * 0x10000;
+          frameSize += tagData[i + 4 + 2] * 0x100;
+          frameSize += tagData[i + 4 + 3];
+        } else {
+          frameSize += tagData[i + 4] * 0x200000;
+          frameSize += tagData[i + 4 + 1] * 0x4000;
+          frameSize += tagData[i + 4 + 2] * 0x80;
+          frameSize += tagData[i + 4 + 3];
+        }
+        _frames.add(ID3Frame(tagData.sublist(i, i + 4),
+            tagData.sublist(i + 10, i + 10 + frameSize)));
+        i += frameSize + 10;
+      }
+    }
+  }
 
   final AudioFile _audioFile;
 
   final List<ID3Frame> _frames = [];
 
-  Future<bool> read() async {
-    _frames.clear();
-    File file = File(_audioFile._path);
-    var randomAccessFile = file.openSync();
-    List<int> head = randomAccessFile.readSync(10);
-    if ((head[0] != 'I'.codeUnitAt(0)) |
-        (head[1] != 'D'.codeUnitAt(0)) |
-        (head[2] != '3'.codeUnitAt(0))) {
-      randomAccessFile.closeSync();
-      return false;
-    } else {
-      int version = head[3];
-      int tagSize = 0;
-
-      tagSize += head[6] * 0x200000;
-      tagSize += head[7] * 0x4000;
-      tagSize += head[8] * 0x80;
-      tagSize += head[9];
-
-      if (tagSize != 0) {
-        List<int> tagData = randomAccessFile.readSync(tagSize);
-        int i = 0;
-        while (i < tagData.length - 10) {
-          if (tagData[i] == 0) break;
-          int frameSize = 0;
-          if (version == 3) {
-            frameSize += tagData[i + 4] * 0x1000000;
-            frameSize += tagData[i + 4 + 1] * 0x10000;
-            frameSize += tagData[i + 4 + 2] * 0x100;
-            frameSize += tagData[i + 4 + 3];
-          } else {
-            frameSize += tagData[i + 4] * 0x200000;
-            frameSize += tagData[i + 4 + 1] * 0x4000;
-            frameSize += tagData[i + 4 + 2] * 0x80;
-            frameSize += tagData[i + 4 + 3];
-          }
-          _frames.add(ID3Frame(tagData.sublist(i, i + 4),
-              tagData.sublist(i + 10, i + 10 + frameSize)));
-          i += frameSize + 10;
-        }
-      }
-      randomAccessFile.closeSync();
-      return true;
-    }
-  }
-
-  Future<bool> save() async {
+  void save() {
     List<int> head = 'ID3'.codeUnits + [0x03, 0x00, 0x00];
     List<int> tagData = [];
     for (var element in _frames) {
@@ -94,9 +81,7 @@ class Mp3File {
     head.add(tagSize ~/ 0x80);
     tagSize %= 0x80;
     head.add(tagSize);
-    File file = File(_audioFile._path);
-    DateTime fileTime = file.lastModifiedSync();
-    List<int> totalData = file.readAsBytesSync();
+    List<int> totalData = _audioFile._rawData;
     if ((totalData[0] == 'I'.codeUnitAt(0)) &
         (totalData[1] == 'D'.codeUnitAt(0)) &
         (totalData[2] == '3'.codeUnitAt(0))) {
@@ -110,9 +95,7 @@ class Mp3File {
       }
     }
     totalData = head + tagData + totalData;
-    file.writeAsBytesSync(totalData, flush: true);
-    file.setLastModifiedSync(fileTime);
-    return true;
+    _audioFile._rawData = totalData;
   }
 
   String? getTitle() {
