@@ -1,5 +1,5 @@
 {
-    "rewrites": [
+  "rewrites": [
     {
       "source": "/api/cloudsearch/pc",
       "destination": "https://music.163.com/api/cloudsearch/pc"
@@ -8,6 +8,8 @@
       "source": "/api/song/lyric",
       "destination": "https://music.163.com/api/song/lyric"
     }
-    ],
-    "outputDirectory": "public"
+  ],
+  "outputDirectory": "build/web",
+  "buildCommand": "flutter/bin/flutter build web --release",
+  "installCommand": "if cd flutter; then git pull && cd .. ; else git clone https://github.com/flutter/flutter.git; fi && ls && flutter/bin/flutter doctor && flutter/bin/flutter clean && flutter/bin/flutter config --enable-web"
 }
