@@ -94,7 +94,7 @@ jobs:
       - name: Download Linux Build
         uses: actions/download-artifact@v3
         with:
-          name: linux_build_${{ env.VERSION }}.tar.gz
+          name: linux_x64_${{ env.VERSION }}.tar.gz
           path: .
 
       - name: Create Release
@@ -102,6 +102,6 @@ jobs:
         with:
           artifacts: |
             android_${{ env.VERSION }}.apk
-            linux_build_${{ env.VERSION }}.tar.gz
+            linux_x64_${{ env.VERSION }}.tar.gz
           tag: ${{ env.VERSION }}
           token: ${{ secrets.YOUR_GITHUB_TOKEN }}
