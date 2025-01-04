@@ -32,6 +32,12 @@ jobs:
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+      
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: android_${{ env.VERSION }}.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Release
         uses: ncipollo/release-action@v1.13.0
@@ -65,11 +71,17 @@ jobs:
 
       - name: Compress Linux Build
         run: |
-          tar -czvf linux_x64.tar.gz -C build/linux/x64/release/bundle .
+          tar -czvf linux_x64_${{ env.VERSION }}.tar.gz -C build/linux/x64/release/bundle .
+
+      - name: Upload bundle as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_x64_${{ env.VERSION }}.tar.gz
+          path: linux_x64_${{ env.VERSION }}.tar.gz
 
       - name: Release Linux
         uses: ncipollo/release-action@v1.13.0
         with:
-          artifacts: "linux_x64.tar.gz"
+          artifacts: "linux_x64_${{ env.VERSION }}.tar.gz"
           tag: ${{ env.VERSION }}
           token: ${{ secrets.YOUR_GITHUB_TOKEN }}
