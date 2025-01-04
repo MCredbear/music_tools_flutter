@@ -79,6 +79,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Extract version from pubspec.yaml
+        id: extract_version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Download Android Build
         uses: actions/download-artifact@v3
         with:
