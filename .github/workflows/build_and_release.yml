@@ -39,13 +39,6 @@ jobs:
           name: android_${{ env.VERSION }}.apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Release
-        uses: ncipollo/release-action@v1.13.0
-        with:
-          artifacts: "build/app/outputs/flutter-apk/app-release.apk"
-          tag: ${{ env.VERSION }}
-          token: ${{ secrets.YOUR_GITHUB_TOKEN }}
-
   build_linux:
     runs-on: ubuntu-latest
 
@@ -79,9 +72,30 @@ jobs:
           name: linux_x64_${{ env.VERSION }}.tar.gz
           path: linux_x64_${{ env.VERSION }}.tar.gz
 
-      - name: Release Linux
+  release:
+    runs-on: ubuntu-latest
+    needs: [build_android, build_linux]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download Android Build
+        uses: actions/download-artifact@v3
+        with:
+          name: android_${{ env.VERSION }}.apk
+          path: .
+
+      - name: Download Linux Build
+        uses: actions/download-artifact@v3
+        with:
+          name: linux_build_${{ env.VERSION }}.tar.gz
+          path: .
+
+      - name: Create Release
         uses: ncipollo/release-action@v1.13.0
         with:
-          artifacts: "linux_x64_${{ env.VERSION }}.tar.gz"
+          artifacts: |
+            android_${{ env.VERSION }}.apk
+            linux_build_${{ env.VERSION }}.tar.gz
           tag: ${{ env.VERSION }}
           token: ${{ secrets.YOUR_GITHUB_TOKEN }}
