@@ -32,12 +32,14 @@ jobs:
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - run: mv build/app/outputs/flutter-apk/app-release.apk android_${{ env.VERSION }}.apk
       
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v3
         with:
           name: android_${{ env.VERSION }}.apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: android_${{ env.VERSION }}.apk
 
   build_linux:
     runs-on: ubuntu-latest
@@ -86,13 +88,13 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Download Android Build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: android_${{ env.VERSION }}.apk
           path: .
 
       - name: Download Linux Build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: linux_x64_${{ env.VERSION }}.tar.gz
           path: .
