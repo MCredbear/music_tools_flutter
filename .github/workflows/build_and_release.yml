@@ -36,7 +36,7 @@ jobs:
       - run: mv build/app/outputs/flutter-apk/app-release.apk android_${{ env.VERSION }}.apk
       
       - name: Upload APK as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android_${{ env.VERSION }}.apk
           path: android_${{ env.VERSION }}.apk
@@ -69,7 +69,7 @@ jobs:
           tar -czvf linux_x64_${{ env.VERSION }}.tar.gz -C build/linux/x64/release/bundle .
 
       - name: Upload bundle as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux_x64_${{ env.VERSION }}.tar.gz
           path: linux_x64_${{ env.VERSION }}.tar.gz
