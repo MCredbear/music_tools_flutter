@@ -1,6 +1,9 @@
-import 'dart:io';
 import 'package:cross_file/cross_file.dart';
+import 'package:flutter/services.dart';
 import 'package:music_tools_flutter/taglib/taglib.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'package:web/web.dart' as web;
+import 'dart:js_interop' as js;
 
 void saveAudioFile(Map<String, dynamic> params) {
   final audioFile = params['audioFile'] as AudioFile;
@@ -16,10 +19,12 @@ void saveAudioFile(Map<String, dynamic> params) {
   audioFile.setComment(params['comment']);
   audioFile.setCover(params['cover']);
   final data = audioFile.save();
-  final file = File(xFile.path);
-  final modifiedTime = file.statSync().modified;
-  final accessedTime = file.statSync().accessed;
-  file.writeAsBytesSync(data);
-  file.setLastModifiedSync(modifiedTime);
-  file.setLastAccessedSync(accessedTime);
+  final blob = web.Blob([Uint8List.fromList(data).toJS].toJS);
+  final url = web.URL.createObjectURL(blob);
+  web.HTMLAnchorElement()
+    ..href = url
+    ..target = 'blank'
+    ..download = xFile.name
+    ..click();
+  web.URL.revokeObjectURL(url);
 }

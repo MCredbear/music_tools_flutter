@@ -10,7 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:cross_file/cross_file.dart';
 
 import 'package:music_tools_flutter/taglib/taglib.dart';
-import 'save_file_web.dart' if (dart.library.html) 'save_file_non_web.dart';
+import 'save_file_non_web.dart' if (dart.library.js_util) 'save_file_web.dart';
 
 class EditorPage extends StatefulWidget {
   const EditorPage(this.xFile, {super.key});
@@ -359,27 +359,41 @@ class EditorPageState extends State<EditorPage> {
     setState(() {
       saving = true;
     });
-    await compute(saveAudioFile, {
-      'audioFile': _audioFile,
-      'xFile': widget.xFile,
-      'title': _titleController.text.isNotEmpty ? _titleController.text : null,
-      'album': _albumController.text.isNotEmpty ? _albumController.text : null,
-      'artist':
-          _artistController.text.isNotEmpty ? _artistController.text : null,
-      'albumArtist': _albumArtistController.text.isNotEmpty
-          ? _albumArtistController.text
-          : null,
-      'cd': _cdController.text.isNotEmpty ? _cdController.text : null,
-      'track': _trackController.text.isNotEmpty ? _trackController.text : null,
-      'year': _yearController.text.isNotEmpty ? _yearController.text : null,
-      'lyric': _lyricController.text.isNotEmpty ? _lyricController.text : null,
-      'comment':
-          _commentController.text.isNotEmpty ? _commentController.text : null,
-      'cover': _cover,
-    });
+    try {
+      await compute(saveAudioFile, {
+        'audioFile': _audioFile,
+        'xFile': widget.xFile,
+        'title':
+            _titleController.text.isNotEmpty ? _titleController.text : null,
+        'album':
+            _albumController.text.isNotEmpty ? _albumController.text : null,
+        'artist':
+            _artistController.text.isNotEmpty ? _artistController.text : null,
+        'albumArtist': _albumArtistController.text.isNotEmpty
+            ? _albumArtistController.text
+            : null,
+        'cd': _cdController.text.isNotEmpty ? _cdController.text : null,
+        'track':
+            _trackController.text.isNotEmpty ? _trackController.text : null,
+        'year': _yearController.text.isNotEmpty ? _yearController.text : null,
+        'lyric':
+            _lyricController.text.isNotEmpty ? _lyricController.text : null,
+        'comment':
+            _commentController.text.isNotEmpty ? _commentController.text : null,
+        'cover': _cover,
+      });
+      showToast('保存成功');
+    } catch (e) {
+      if (e.runtimeType.toString() == 'JSRangeError') {
+        showToast('保存失败: 文件过大，请使用本地客户端处理',
+            duration: const Duration(seconds: 5));
+      } else {
+        showToast('保存失败: ${e.toString()}',
+            duration: const Duration(seconds: 5));
+      }
+    }
     setState(() {
       saving = false;
     });
-    showToast('保存成功');
   }
 }
