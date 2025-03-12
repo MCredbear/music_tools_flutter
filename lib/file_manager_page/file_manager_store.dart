@@ -32,7 +32,6 @@ abstract class FileManagerStoreBase with Store {
       case SortOrder.byModifiedTime:
         sortByModifiedTime();
         break;
-      default:
     }
   }
 
@@ -49,7 +48,6 @@ abstract class FileManagerStoreBase with Store {
       case SortOrder.byModifiedTime:
         sortByModifiedTime();
         break;
-      default:
     }
   }
 
@@ -62,9 +60,9 @@ abstract class FileManagerStoreBase with Store {
         fileSystemEntities.add(element);
       } else {
         String format = p.extension(element.path);
-        if ((format.lastIndexOf(RegExp('mp3', caseSensitive: false)) != -1) |
-            (format.lastIndexOf(RegExp('flac', caseSensitive: false)) != -1) |
-            (format.lastIndexOf(RegExp('wav', caseSensitive: false)) != -1)) {
+        if ((format.toLowerCase() == 'mp3') |
+            (format.toLowerCase() == 'flac') |
+            (format.toLowerCase() == 'wav')) {
           fileSystemEntities.add(element);
         }
       }
@@ -76,7 +74,6 @@ abstract class FileManagerStoreBase with Store {
       case SortOrder.byModifiedTime:
         sortByModifiedTime();
         break;
-      default:
     }
   }
 
