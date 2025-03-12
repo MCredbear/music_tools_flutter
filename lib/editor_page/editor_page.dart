@@ -31,7 +31,13 @@ class EditorPageState extends State<EditorPage> {
     super.initState();
 
     widget.xFile.readAsBytes().then((bytes) {
-      _audioFile = AudioFile(bytes);
+      _audioFile = AudioFile(
+          bytes,
+          switch (extension(widget.xFile.name).toLowerCase()) {
+            '.mp3' => Format.mp3,
+            '.flac' => Format.flac,
+            _ => Format.unknow
+          });
       setState(() {
         _titleController.text = _audioFile.getTitle() ?? '';
         _artistController.text = _audioFile.getArtist() ?? '';

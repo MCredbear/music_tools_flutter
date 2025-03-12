@@ -11,44 +11,17 @@ part 'flac.dart';
 enum Format { unknow, mp3, flac }
 
 class AudioFile {
-  AudioFile(Uint8List rawData, {Format? format}) : _rawData = rawData {
-    if (format == null) {
-      // guess format from first bytes of rawData
-      if (_rawData.length > 4) {
-        if (_rawData[0] == 0x49 && _rawData[1] == 0x44 && _rawData[2] == 0x33) {
-          _format = Format.mp3;
-        } else if (_rawData[0] == 0x66 &&
-            _rawData[1] == 0x4C &&
-            _rawData[2] == 0x61 &&
-            _rawData[3] == 0x43) {
-          _format = Format.flac;
-        } else
-          _format = Format.unknow;
-      } else
-        _format = Format.unknow;
-
-      switch (_format) {
-        case Format.mp3:
-          _mp3file = Mp3File(this);
-          break;
-        case Format.flac:
-          _flacFile = FlacFile(this);
-          break;
-        default:
-          break;
-      }
-    } else {
-      _format = format;
-      switch (_format) {
-        case Format.mp3:
-          _mp3file = Mp3File(this);
-          break;
-        case Format.flac:
-          _flacFile = FlacFile(this);
-          break;
-        default:
-          break;
-      }
+  AudioFile(Uint8List rawData, Format format) : _rawData = rawData {
+    _format = format;
+    switch (_format) {
+      case Format.mp3:
+        _mp3file = Mp3File(this);
+        break;
+      case Format.flac:
+        _flacFile = FlacFile(this);
+        break;
+      default:
+        break;
     }
   }
 

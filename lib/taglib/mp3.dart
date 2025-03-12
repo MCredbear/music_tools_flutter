@@ -17,36 +17,58 @@ class ID3Frame {
 
 class Mp3File {
   Mp3File(this._audioFile) {
-    List<int> head = _audioFile._rawData.sublist(0, 10);
+    final rawData = _audioFile._rawData;
+    int mpegFrameIndex = findFirstMpegFrame(rawData);
 
-    int version = head[3];
-    int tagSize = 0;
+    if (mpegFrameIndex > 10) {
+      List<int> head = rawData.sublist(0, 10);
 
-    tagSize += head[6] * 0x200000;
-    tagSize += head[7] * 0x4000;
-    tagSize += head[8] * 0x80;
-    tagSize += head[9];
+      if (head[0] == 'I'.codeUnitAt(0) &&
+          head[1] == 'D'.codeUnitAt(0) &&
+          head[2] == '3'.codeUnitAt(0)) {
+        int version = head[3];
+        int tagSize = 0;
 
-    if (tagSize != 0) {
-      List<int> tagData = _audioFile._rawData.sublist(10, 10 + tagSize);
-      int i = 0;
-      while (i < tagData.length - 10) {
-        if (tagData[i] == 0) break;
-        int frameSize = 0;
-        if (version == 3) {
-          frameSize += tagData[i + 4] * 0x1000000;
-          frameSize += tagData[i + 4 + 1] * 0x10000;
-          frameSize += tagData[i + 4 + 2] * 0x100;
-          frameSize += tagData[i + 4 + 3];
+        if (version == 2) {
+          tagSize =
+              (head[6] << 24) | (head[7] << 16) | (head[8] << 8) | head[9];
         } else {
-          frameSize += tagData[i + 4] * 0x200000;
-          frameSize += tagData[i + 4 + 1] * 0x4000;
-          frameSize += tagData[i + 4 + 2] * 0x80;
-          frameSize += tagData[i + 4 + 3];
+          tagSize =
+              (head[6] << 21) | (head[7] << 14) | (head[8] << 7) | head[9];
         }
-        _frames.add(ID3Frame(tagData.sublist(i, i + 4),
-            tagData.sublist(i + 10, i + 10 + frameSize)));
-        i += frameSize + 10;
+
+        if (tagSize != 0) {
+          List<int> tagData = rawData.sublist(10, 10 + tagSize);
+          int i = 0;
+          while (i < tagData.length - 10) {
+            if (tagData[i] == 0) break;
+            int frameSize = 0;
+            if (version == 2) {
+              frameSize = (tagData[i + 3] << 16) |
+                  (tagData[i + 4] << 8) |
+                  tagData[i + 5];
+              _frames.add(ID3Frame(tagData.sublist(i, i + 3),
+                  tagData.sublist(i + 6, i + 6 + frameSize)));
+              i += frameSize + 6;
+            } else if (version == 3) {
+              frameSize = (tagData[i + 4] << 24) |
+                  (tagData[i + 5] << 16) |
+                  (tagData[i + 6] << 8) |
+                  tagData[i + 7];
+              _frames.add(ID3Frame(tagData.sublist(i, i + 4),
+                  tagData.sublist(i + 10, i + 10 + frameSize)));
+              i += frameSize + 10;
+            } else if (version == 4) {
+              frameSize = (tagData[i + 4] << 21) |
+                  (tagData[i + 5] << 14) |
+                  (tagData[i + 6] << 7) |
+                  tagData[i + 7];
+              _frames.add(ID3Frame(tagData.sublist(i, i + 4),
+                  tagData.sublist(i + 10, i + 10 + frameSize)));
+              i += frameSize + 10;
+            }
+          }
+        }
       }
     }
   }
@@ -55,47 +77,38 @@ class Mp3File {
 
   final List<ID3Frame> _frames = [];
 
+  int findFirstMpegFrame(List<int> rawData) {
+    for (int i = 0; i < rawData.length - 1; i++) {
+      if (rawData[i] == 0xFF && (rawData[i + 1] & 0xE0) == 0xE0) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   void save() {
-    List<int> head = 'ID3'.codeUnits + [0x03, 0x00, 0x00];
+    List<int> head = 'ID3'.codeUnits + [0x04, 0x00, 0x00];
     List<int> tagData = [];
     for (var element in _frames) {
       List<int> frameData = [];
       frameData.addAll(element.name);
       int frameSize = element.data.length;
-      frameData.add(frameSize ~/ 0x1000000);
-      frameSize %= 0x1000000;
-      frameData.add(frameSize ~/ 0x10000);
-      frameSize %= 0x10000;
-      frameData.add(frameSize ~/ 0x100);
-      frameSize %= 0x100;
-      frameData.add(frameSize);
-      frameData += [0x00, 0x00];
+      frameData.add((frameSize >> 21) & 0x7F);
+      frameData.add((frameSize >> 14) & 0x7F);
+      frameData.add((frameSize >> 7) & 0x7F);
+      frameData.add(frameSize & 0x7F);
+      frameData += [0x00, 0x00]; // Flags
       frameData += element.data;
       tagData.addAll(frameData);
     }
     int tagSize = tagData.length;
-    head.add(tagSize ~/ 0x200000);
-    tagSize %= 0x200000;
-    head.add(tagSize ~/ 0x4000);
-    tagSize %= 0x4000;
-    head.add(tagSize ~/ 0x80);
-    tagSize %= 0x80;
-    head.add(tagSize);
-    List<int> totalData = _audioFile._rawData;
-    if ((totalData[0] == 'I'.codeUnitAt(0)) &
-        (totalData[1] == 'D'.codeUnitAt(0)) &
-        (totalData[2] == '3'.codeUnitAt(0))) {
-      int preTagSize = 0;
-      preTagSize += totalData[6] * 0x200000;
-      preTagSize += totalData[7] * 0x4000;
-      preTagSize += totalData[8] * 0x80;
-      preTagSize += totalData[9];
-      if (preTagSize != 0) {
-        totalData = totalData.sublist(10 + preTagSize);
-      }
-    }
-    totalData = head + tagData + totalData;
-    _audioFile._rawData = totalData;
+    head.add((tagSize >> 21) & 0x7F);
+    head.add((tagSize >> 14) & 0x7F);
+    head.add((tagSize >> 7) & 0x7F);
+    head.add(tagSize & 0x7F);
+    int mpegFrameIndex = findFirstMpegFrame(_audioFile._rawData);
+    _audioFile._rawData =
+        head + tagData + _audioFile._rawData.sublist(mpegFrameIndex);
   }
 
   String? getTitle() {
