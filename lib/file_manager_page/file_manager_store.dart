@@ -60,9 +60,9 @@ abstract class FileManagerStoreBase with Store {
         fileSystemEntities.add(element);
       } else {
         String format = p.extension(element.path);
-        if ((format.toLowerCase() == 'mp3') |
-            (format.toLowerCase() == 'flac') |
-            (format.toLowerCase() == 'wav')) {
+        if ((format.toLowerCase() == '.mp3') |
+            (format.toLowerCase() == '.flac') |
+            (format.toLowerCase() == '.wav')) {
           fileSystemEntities.add(element);
         }
       }
