@@ -10,7 +10,7 @@ class FlacMetaBlock {
 class VorbisComment {
   VorbisComment(this.name, this.data);
 
-  List<int> name;
+  String name;
   List<int> data;
 }
 
@@ -36,7 +36,9 @@ class VorbisCommentBlock {
           var comment =
               _flacMetaBlock.data.sublist(pos + 4, pos + 4 + commentSize);
           _comments.add(VorbisComment(
-              comment.sublist(0, comment.indexOf('='.codeUnitAt(0))),
+              String.fromCharCodes(
+                      comment.sublist(0, comment.indexOf('='.codeUnitAt(0))))
+                  .toUpperCase(),
               comment.sublist(comment.indexOf('='.codeUnitAt(0)) + 1)));
         }
         pos += 4 + commentSize;
@@ -48,7 +50,7 @@ class VorbisCommentBlock {
   final List<VorbisComment> _comments = [];
 
   void save() {
-    var vendor = '野兽先辈1.1.4.5.1.4'.codeUnits;
+    var vendor = 'taglib_dart'.codeUnits;
     var vendorLength = vendor.length;
     var vendorLengthBytes = List<int>.filled(4, 0);
     vendorLengthBytes[3] = vendorLength >> 24;
@@ -69,7 +71,9 @@ class VorbisCommentBlock {
     commentsCountBytes[0] = commentsCount;
     List<int> commentsData = [];
     for (var comment in _comments) {
-      var commentSize = comment.name.length + 1 + comment.data.length;
+      var commentSize = comment.name.codeUnits.length +
+          '='.codeUnits.length +
+          comment.data.length;
       var commentSizeBytes = List<int>.filled(4, 0);
       commentSizeBytes[3] = commentSize >> 24;
       commentSize %= 0x1000000;
@@ -78,8 +82,10 @@ class VorbisCommentBlock {
       commentSizeBytes[1] = commentSize >> 8;
       commentSize %= 0x100;
       commentSizeBytes[0] = commentSize;
-      commentsData +=
-          commentSizeBytes + comment.name + '='.codeUnits + comment.data;
+      commentsData += commentSizeBytes +
+          comment.name.codeUnits +
+          '='.codeUnits +
+          comment.data;
     }
     _flacMetaBlock.data =
         vendorLengthBytes + vendor + commentsCountBytes + commentsData;
@@ -87,7 +93,7 @@ class VorbisCommentBlock {
 
   String? getTitle() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'TITLE'.codeUnits)) {
+      if (comment.name == 'TITLE') {
         return utf8.decode(comment.data);
       }
     }
@@ -96,7 +102,7 @@ class VorbisCommentBlock {
 
   String? getArtist() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'ARTIST'.codeUnits)) {
+      if (comment.name == 'ARTIST') {
         return utf8.decode(comment.data);
       }
     }
@@ -105,7 +111,7 @@ class VorbisCommentBlock {
 
   String? getAlbum() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'ALBUM'.codeUnits)) {
+      if (comment.name == 'ALBUM') {
         return utf8.decode(comment.data);
       }
     }
@@ -114,9 +120,9 @@ class VorbisCommentBlock {
 
   String? getAlbumArtist() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'ALBUMARTIST'.codeUnits)) {
+      if (comment.name == 'ALBUMARTIST') {
         return utf8.decode(comment.data);
-      } else if (listEquals(comment.name, 'ALBUM_ARTIST'.codeUnits)) {
+      } else if (comment.name == 'ALBUM_ARTIST') {
         return utf8.decode(comment.data);
       }
     }
@@ -125,7 +131,7 @@ class VorbisCommentBlock {
 
   String? getLyric() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'LYRICS'.codeUnits)) {
+      if (comment.name == 'LYRICS') {
         return utf8.decode(comment.data);
       }
     }
@@ -134,9 +140,9 @@ class VorbisCommentBlock {
 
   String? getComment() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'DESCRIPTION'.codeUnits)) {
+      if (comment.name == 'DESCRIPTION') {
         return utf8.decode(comment.data);
-      } else if (listEquals(comment.name, 'COMMENT'.codeUnits)) {
+      } else if (comment.name == 'COMMENT') {
         return utf8.decode(comment.data);
       }
     }
@@ -145,9 +151,9 @@ class VorbisCommentBlock {
 
   String? getTrack() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'TRACKNUMBER'.codeUnits)) {
+      if (comment.name == 'TRACKNUMBER') {
         return utf8.decode(comment.data);
-      } else if (listEquals(comment.name, 'TRACKNUM'.codeUnits)) {
+      } else if (comment.name == 'TRACKNUM') {
         return utf8.decode(comment.data);
       }
     }
@@ -156,7 +162,7 @@ class VorbisCommentBlock {
 
   String? getCD() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'DISCNUMBER'.codeUnits)) {
+      if (comment.name == 'DISCNUMBER') {
         return utf8.decode(comment.data);
       }
     }
@@ -165,9 +171,9 @@ class VorbisCommentBlock {
 
   String? getYear() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'DATE'.codeUnits)) {
+      if (comment.name == 'DATE') {
         return utf8.decode(comment.data);
-      } else if (listEquals(comment.name, 'YEAR'.codeUnits)) {
+      } else if (comment.name == 'YEAR') {
         return utf8.decode(comment.data);
       }
     }
@@ -176,7 +182,7 @@ class VorbisCommentBlock {
 
   String? getEncoder() {
     for (final comment in _comments) {
-      if (listEquals(comment.name, 'ENCODER'.codeUnits)) {
+      if (comment.name == 'ENCODER') {
         return utf8.decode(comment.data);
       }
     }
@@ -184,168 +190,228 @@ class VorbisCommentBlock {
   }
 
   void setTitle(String? title) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'TITLE'.codeUnits)) {
-        (title != null)
-            ? comment.data = utf8.encode(title)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (title != null) {
-      _comments.add(VorbisComment('TITLE'.codeUnits, utf8.encode(title)));
+      for (final comment in _comments) {
+        if (comment.name == 'TITLE') {
+          comment.data = utf8.encode(title);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('TITLE', utf8.encode(title)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'TITLE') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 
   void setArtist(String? artist) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'ARTIST'.codeUnits)) {
-        (artist != null)
-            ? comment.data = utf8.encode(artist)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (artist != null) {
-      _comments.add(VorbisComment('ARTIST'.codeUnits, utf8.encode(artist)));
+      for (final comment in _comments) {
+        if (comment.name == 'ARTIST') {
+          comment.data = utf8.encode(artist);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('ARTIST', utf8.encode(artist)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'ARTIST') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 
   void setAlbum(String? album) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'ALBUM'.codeUnits)) {
-        (album != null)
-            ? comment.data = utf8.encode(album)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (album != null) {
-      _comments.add(VorbisComment('ALBUM'.codeUnits, utf8.encode(album)));
+      for (final comment in _comments) {
+        if (comment.name == 'ALBUM') {
+          comment.data = utf8.encode(album);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('ALBUM', utf8.encode(album)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'ALBUM') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 
   void setAlbumArtist(String? albumArtist) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'ALBUMARTIST'.codeUnits)) {
-        (albumArtist != null)
-            ? comment.data = utf8.encode(albumArtist)
-            : _comments.remove(comment);
-        return;
-      }
-      if (listEquals(comment.name, 'ALBUM_ARTIST'.codeUnits)) {
-        (albumArtist != null)
-            ? comment.data = utf8.encode(albumArtist)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (albumArtist != null) {
-      _comments.add(
-          VorbisComment('ALBUMARTIST'.codeUnits, utf8.encode(albumArtist)));
+      for (final comment in _comments) {
+        if (comment.name == 'ALBUMARTIST') {
+          comment.data = utf8.encode(albumArtist);
+          return;
+        }
+      }
+      for (final comment in _comments) {
+        if (comment.name == 'ALBUM_ARTIST') {
+          comment.data = utf8.encode(albumArtist);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('ALBUMARTIST', utf8.encode(albumArtist)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'ALBUMARTIST') {
+          _comments.remove(comment);
+          return;
+        }
+      }
+      for (final comment in _comments) {
+        if (comment.name == 'ALBUM_ARTIST') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 
   void setLyric(String? lyric) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'LYRICS'.codeUnits)) {
-        (lyric != null)
-            ? comment.data = utf8.encode(lyric)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (lyric != null) {
-      _comments.add(VorbisComment('LYRICS'.codeUnits, utf8.encode(lyric)));
+      for (final comment in _comments) {
+        if (comment.name == 'LYRICS') {
+          comment.data = utf8.encode(lyric);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('LYRICS', utf8.encode(lyric)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'LYRICS') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 
   void setComment(String? comment) {
-    for (final comment_ in _comments) {
-      if (listEquals(comment_.name, 'DESCRIPTION'.codeUnits)) {
-        (comment != null)
-            ? comment_.data = utf8.encode(comment)
-            : _comments.remove(comment_);
-        return;
-      }
-      if (listEquals(comment_.name, 'COMMENT'.codeUnits)) {
-        (comment != null)
-            ? comment_.data = utf8.encode(comment)
-            : _comments.remove(comment_);
-        return;
-      }
-    }
     if (comment != null) {
-      _comments
-          .add(VorbisComment('DESCRIPTION'.codeUnits, utf8.encode(comment)));
+      for (final comment_ in _comments) {
+        if (comment_.name == 'DESCRIPTION') {
+          comment_.data = utf8.encode(comment);
+          return;
+        }
+        if (comment_.name == 'COMMENT') {
+          comment_.data = utf8.encode(comment);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('DESCRIPTION', utf8.encode(comment)));
+    } else {
+      for (final comment_ in _comments) {
+        if (comment_.name == 'DESCRIPTION') {
+          _comments.remove(comment_);
+          return;
+        }
+        if (comment_.name == 'COMMENT') {
+          _comments.remove(comment_);
+          return;
+        }
+      }
     }
   }
 
   void setTrack(String? track) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'TRACKNUMBER'.codeUnits)) {
-        (track != null)
-            ? comment.data = utf8.encode(track)
-            : _comments.remove(comment);
-        return;
-      }
-      if (listEquals(comment.name, 'TRACKNUM'.codeUnits)) {
-        (track != null)
-            ? comment.data = utf8.encode(track)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (track != null) {
-      _comments.add(VorbisComment('TRACKNUMBER'.codeUnits, utf8.encode(track)));
+      for (final comment in _comments) {
+        if (comment.name == 'TRACKNUMBER') {
+          comment.data = utf8.encode(track);
+          return;
+        }
+        if (comment.name == 'TRACKNUM') {
+          comment.data = utf8.encode(track);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('TRACKNUMBER', utf8.encode(track)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'TRACKNUMBER') {
+          _comments.remove(comment);
+          return;
+        }
+        if (comment.name == 'TRACKNUM') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 
   void setCD(String? cd) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'DISCNUMBER'.codeUnits)) {
-        (cd != null)
-            ? comment.data = utf8.encode(cd)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (cd != null) {
-      _comments.add(VorbisComment('DISCNUMBER'.codeUnits, utf8.encode(cd)));
+      for (final comment in _comments) {
+        if (comment.name == 'DISCNUMBER') {
+          comment.data = utf8.encode(cd);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('DISCNUMBER', utf8.encode(cd)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'DISCNUMBER') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 
   void setYear(String? year) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'DATE'.codeUnits)) {
-        (year != null)
-            ? comment.data = utf8.encode(year)
-            : _comments.remove(comment);
-        return;
-      }
-      if (listEquals(comment.name, 'YEAR'.codeUnits)) {
-        (year != null)
-            ? comment.data = utf8.encode(year)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (year != null) {
-      _comments.add(VorbisComment('DATE'.codeUnits, utf8.encode(year)));
+      for (final comment in _comments) {
+        if (comment.name == 'DATE') {
+          comment.data = utf8.encode(year);
+          return;
+        }
+        if (comment.name == 'YEAR') {
+          comment.data = utf8.encode(year);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('DATE', utf8.encode(year)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'DATE') {
+          _comments.remove(comment);
+          return;
+        }
+        if (comment.name == 'YEAR') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 
   void setEncoder(String? encoder) {
-    for (final comment in _comments) {
-      if (listEquals(comment.name, 'ENCODER'.codeUnits)) {
-        (encoder != null)
-            ? comment.data = utf8.encode(encoder)
-            : _comments.remove(comment);
-        return;
-      }
-    }
     if (encoder != null) {
-      _comments.add(VorbisComment('ENCODER'.codeUnits, utf8.encode(encoder)));
+      for (final comment in _comments) {
+        if (comment.name == 'ENCODER') {
+          comment.data = utf8.encode(encoder);
+          return;
+        }
+      }
+      _comments.add(VorbisComment('ENCODER', utf8.encode(encoder)));
+    } else {
+      for (final comment in _comments) {
+        if (comment.name == 'ENCODER') {
+          _comments.remove(comment);
+          return;
+        }
+      }
     }
   }
 }
