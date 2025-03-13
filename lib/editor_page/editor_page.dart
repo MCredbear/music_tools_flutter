@@ -9,7 +9,7 @@ import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cross_file/cross_file.dart';
 
-import 'package:music_tools_flutter/taglib/taglib.dart';
+import 'package:taglib_dart/taglib_dart.dart';
 import 'save_file_non_web.dart' if (dart.library.js_util) 'save_file_web.dart';
 
 class EditorPage extends StatefulWidget {

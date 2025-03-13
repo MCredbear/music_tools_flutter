@@ -695,6 +695,15 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "1.4.1"
+  taglib_dart:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "5358fe78272fe7e1f6249b60610c5835a5bc0417"
+      url: "https://github.com/MCredbear/taglib_dart.git"
+    source: git
+    version: "1.0.0"
   term_glyph:
     dependency: transitive
     description:
@@ -808,5 +817,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.7.0-0 <4.0.0"
+  dart: ">=3.7.0-267.0.dev <4.0.0"
   flutter: ">=3.22.0"
