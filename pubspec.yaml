@@ -2,7 +2,7 @@ name: music_tools_flutter
 description: A tool to edit tag of audio files, based on flutter.
 publish_to: 'none'
 
-version: 1.4.0
+version: 1.5.0
 
 environment:
   sdk: '>=3.6.0 <4.0.0'
