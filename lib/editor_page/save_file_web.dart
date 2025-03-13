@@ -1,6 +1,6 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/services.dart';
-import 'package:music_tools_flutter/taglib/taglib.dart';
+import 'package:taglib_dart/taglib_dart.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'package:web/web.dart' as web;
 import 'dart:js_interop' as js;

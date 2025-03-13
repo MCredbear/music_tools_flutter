@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:cross_file/cross_file.dart';
-import 'package:music_tools_flutter/taglib/taglib.dart';
+import 'package:taglib_dart/taglib_dart.dart';
 
 void saveAudioFile(Map<String, dynamic> params) {
   final audioFile = params['audioFile'] as AudioFile;
